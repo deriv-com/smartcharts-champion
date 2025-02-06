@@ -61,7 +61,7 @@
         "@commitlint/cli": "^19.3.0",
         "@commitlint/config-conventional": "^19.2.2",
         "@commitlint/cz-commitlint": "^19.2.0",
-        "@deriv/api-types": "^1.0.47",
+        "@deriv/api-types": "^1.0.2589",
         "@semantic-release/changelog": "^6.0.3",
         "@semantic-release/github": "^9.2.6",
         "@semantic-release/npm": "^11.0.3",
