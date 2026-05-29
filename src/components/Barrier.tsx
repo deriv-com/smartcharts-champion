@@ -77,6 +77,7 @@ const Barrier = ({ store, ...props }: TBarrierBaseProps) => {
                         hideOffscreenLine={hideOffscreenLine}
                         hideBarrierLine={hideBarrierLine}
                         opacityOnOverlap={opacityOnOverlap}
+                        useInlineLabel={useInlineLabel}
                         {...props}
                     />
                     <Shade store={aboveShadeStore} />
