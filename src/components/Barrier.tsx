@@ -30,6 +30,7 @@ const Barrier = ({ store, ...props }: TBarrierBaseProps) => {
         lineStyle,
         opacityOnOverlap,
         shadeColor = '#008832',
+        useInlineLabel,
     } = store;
 
     const barrierRef = React.useRef<HTMLDivElement>(null);
@@ -61,6 +62,7 @@ const Barrier = ({ store, ...props }: TBarrierBaseProps) => {
                 hideOffscreenLine={hideOffscreenLine}
                 hideBarrierLine={hideBarrierLine}
                 opacityOnOverlap={opacityOnOverlap}
+                useInlineLabel={useInlineLabel}
                 {...props}
             />
             {!isSingleBarrier && (

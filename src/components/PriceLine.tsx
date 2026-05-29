@@ -3,6 +3,7 @@ import { observer } from 'mobx-react-lite';
 import classNames from 'classnames';
 import PriceLineStore from 'src/store/PriceLineStore';
 import PriceLineArrow from './PriceLineArrow';
+import PriceLineInline from './PriceLineInline';
 import PriceLineTitle from './PriceLineTitle';
 import HamburgerDragIcon from './HamburgerDragIcon';
 
@@ -17,6 +18,7 @@ type TPriceLineProps = {
     color?: string;
     opacityOnOverlap: number;
     title?: string;
+    useInlineLabel?: boolean;
 };
 
 const PriceLine = ({
@@ -30,7 +32,23 @@ const PriceLine = ({
     hideBarrierLine,
     store,
     title,
+    useInlineLabel,
 }: TPriceLineProps) => {
+    if (useInlineLabel) {
+        return (
+            <PriceLineInline
+                store={store}
+                lineStyle={lineStyle}
+                color={color}
+                hideOffscreenBarrier={hideOffscreenBarrier}
+                hideOffscreenLine={hideOffscreenLine}
+                hideBarrierLine={hideBarrierLine}
+                opacityOnOverlap={opacityOnOverlap}
+                title={title}
+            />
+        );
+    }
+
     const {
         className,
         draggable,

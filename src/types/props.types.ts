@@ -228,6 +228,7 @@ export type TBarrierUpdateProps = {
     showOffscreenArrows?: boolean;
     isSingleBarrier?: boolean;
     opacityOnOverlap?: number;
+    useInlineLabel?: boolean;
     key: string;
 };
 

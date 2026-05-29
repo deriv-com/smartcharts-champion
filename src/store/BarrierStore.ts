@@ -54,6 +54,7 @@ export default class BarrierStore {
     hideOffscreenLine = false;
     hideOffscreenBarrier = false;
     isSingleBarrier = false;
+    useInlineLabel = false;
 
     _shadeState = '';
 
@@ -81,6 +82,7 @@ export default class BarrierStore {
             isSingleBarrier: observable,
             isTopShadeVisible: observable,
             lineStyle: observable,
+            useInlineLabel: observable,
             pip: computed,
             shadeColor: observable,
             updateProps: action.bound,
@@ -144,6 +146,7 @@ export default class BarrierStore {
         showOffscreenArrows,
         isSingleBarrier,
         opacityOnOverlap,
+        useInlineLabel,
     }: TBarrierUpdateProps): void {
         this.initializePromise.then(
             action(() => {
@@ -194,6 +197,7 @@ export default class BarrierStore {
                 this.hideOffscreenLine = !!hideOffscreenLine;
                 this.hideOffscreenBarrier = !!hideOffscreenBarrier;
                 this.isSingleBarrier = !!isSingleBarrier;
+                this.useInlineLabel = !!useInlineLabel;
             })
         );
         if (opacityOnOverlap) {

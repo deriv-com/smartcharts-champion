@@ -211,4 +211,58 @@
     /* stylelint-enable plugin/no-unsupported-browser-features */
 }
 
+/* Inline-label variant (used by host apps that pass useInlineLabel) */
+
+.chart-line--inline-label {
+    pointer-events: none;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    width: 100%;
+    height: 0;
+    left: 0;
+
+    .price-line-inline__line {
+        flex: 1 1 auto;
+        height: 0;
+        border-top-width: 1px;
+        margin: 0;
+        min-width: 0;
+    }
+    .price-line-inline__label-row {
+        flex: 0 0 auto;
+        display: flex;
+        align-items: center;
+        gap: 2px;
+        padding-right: 4px;
+        padding-left: 4px;
+        font-size: 12px;
+        line-height: 20px;
+        font-weight: normal;
+        white-space: nowrap;
+    }
+    .price-line-inline__chevron {
+        flex-shrink: 0;
+    }
+    .price-line-inline__title {
+        padding: 0 4px;
+    }
+    .price-line-inline__pill {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 2px 8px;
+        border: 1px solid;
+        border-radius: 4px;
+        font-size: 12px;
+        line-height: 20px;
+        font-feature-settings: 'lnum' 1, 'tnum' 1;
+        background-color: $COLOR_WHITE;
+    }
+}
+
+.smartcharts-dark .chart-line--inline-label .price-line-inline__pill {
+    background-color: $color-black-1;
+}
+
 /*! rtl:end:ignore */
