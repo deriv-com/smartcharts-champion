@@ -247,6 +247,7 @@ Attributes marked with `*` are **mandatory**:
 | opacityOnOverlap     | Sets the opacity of the barrier when it is overlapping with other barrier.                                                                                                         |
 | high\*               | Sets the price of the high barrier.                                                                                                                                                |
 | low\*                | Sets the price of the low barrier.                                                                                                                                                 |
+| useInlineLabel       | Opt-in to the inline-label barrier variant (for TP / SL / Stop-Out lines). Renders a colored line that stops before an inline label row containing an optional off-screen chevron, the title, and a price pill — all sharing the barrier `color`. The default render path is unchanged when this is `false`. Defaults to `false`. |
 
 ### Handling Type Errors in StreamManager.ts
 
@@ -789,5 +790,3 @@ export default connect(
 ```
 
 Note that **for independent components, the `mapperFunction` is applied to the store instance**, not the main store. Should you need to access any value from the main store, you can do this via the `mainStore` passed to the constructor of each independent store class.
-
-
