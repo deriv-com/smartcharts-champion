@@ -44,41 +44,46 @@ class DrawingToolModel {
   /// Drawing tools repo
   late AddOnsRepository<DrawingToolConfig> drawingToolsRepo;
 
+  /// An always-empty drawing-tools repo handed to read-only chart instances
+  /// (e.g. the contract-details replay chart). Passing this instead of
+  /// [drawingToolsRepo] ensures the `InteractiveLayer` has nothing to render
+  /// — `items` is empty and there is no UI path that adds to it. We never
+  /// call `loadFromPrefs` on this repo, so it stays empty for the lifetime
+  /// of the app and never overwrites SharedPreferences. The trade chart
+  /// continues using the live [drawingToolsRepo] unchanged.
+  final AddOnsRepository<DrawingToolConfig> emptyDrawingToolsRepo =
+      AddOnsRepository<DrawingToolConfig>(
+    createAddOn: (Map<String, dynamic> map) => DrawingToolConfig.fromJson(map),
+    sharedPrefKey: '__replay_no_drawings__',
+  );
+
   /// DrawingTools
   late DrawingTools drawingTools;
 
   InteractiveLayerController get interactiveLayerController =>
       interactiveLayerBehaviour.controller;
 
-  /// Initialize new chart
+  /// Initialize new chart. Caller (ChartApp.newChart) is responsible for
+  /// awaiting `chartReady` and then invoking [loadAndNotifyDrawings].
   void newChart(JSNewChart payload) {
     symbol = payload.symbol ?? '';
-
-    // Wait for the chart to be fully initialized before loading drawing tools
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
-      // TODO(Jim): Find a better way to ensure the chart is ready
-      // Wait for chart initialization to complete
-      await Future.delayed(const Duration(milliseconds: 5000));
-      await _loadSavedDrawingTools();
-    });
   }
 
-  Future<void> _loadSavedDrawingTools() async {
+  /// Loads drawings for the current [symbol] from SharedPreferences and
+  /// notifies the JS side. Must be invoked AFTER the chart is mounted
+  /// (await `ChartApp.chartReady` first); otherwise drawings would attempt to
+  /// resolve their epoch/quote coordinates before the price axis exists.
+  ///
+  /// The JS-side notification fires unconditionally — even with an empty list
+  /// — because `DrawToolsStore.onLoad` is the only path that resets the JS
+  /// `activeToolsGroup` cache. Skipping the call on symbols with no saved
+  /// drawings would leave the previous symbol's tools listed in the JS UI
+  /// panel/badge while the Flutter chart underneath is correctly empty.
+  Future<void> loadAndNotifyDrawings() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     drawingToolsRepo.loadFromPrefs(prefs, symbol);
 
-    // Use WidgetsBinding to ensure the UI is ready and then notify JavaScript
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
-      // TODO(Jim): Find a better way to ensure the chart is ready
-      // Add a delay to ensure the chart is fully initialized and ready to render
-      await Future.delayed(const Duration(milliseconds: 1000));
-
-      final List<String> drawingToolsJson = getDrawingToolsRepoItems();
-      if (drawingToolsJson.isNotEmpty) {
-        // Notify JavaScript side that drawing tools have been loaded
-        JsInterop.drawingTool?.onLoad?.call(drawingToolsJson);
-      }
-    });
+    JsInterop.drawingTool?.onLoad?.call(getDrawingToolsRepoItems());
   }
 
   /// To select a drawing

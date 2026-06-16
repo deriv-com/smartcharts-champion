@@ -249,6 +249,15 @@ class DerivChartWrapperState extends State<DerivChartWrapper> {
                             : InteractiveLayerDesktopBehaviour());
 
                     return DerivChart(
+                      // Force a full remount when toggling between live (trade)
+                      // and data-fit (contract-details replay) modes. Without
+                      // a key flip, DerivChart and its `InteractiveLayer` child
+                      // would just rebuild with new props, but `InteractiveLayer`
+                      // has no `didUpdateWidget` for `drawingToolsRepo`, so its
+                      // listener stays bound to the previous repo and its
+                      // `_interactableDrawings` State map keeps the previous
+                      // chart's drawings. Re-keying discards that State.
+                      key: ValueKey<bool>(configModel.startWithDataFitMode),
                       activeSymbol: configModel.symbol,
                       mainSeries: mainSeries,
                       annotations: feedModel.ticks.isNotEmpty
@@ -308,7 +317,14 @@ class DerivChartWrapperState extends State<DerivChartWrapper> {
                         markerGroupList: configModel.markerGroupList,
                         markerGroupIconPainter: getMarkerGroupPainter(app),
                       ),
-                      drawingToolsRepo: drawingToolModel.drawingToolsRepo,
+                      // Replay charts get an always-empty drawing-tools repo
+                      // so the `InteractiveLayer` has nothing to render. Per-
+                      // symbol persistence in SharedPreferences is untouched —
+                      // when the user returns to the trade chart, the live
+                      // repo reloads via `loadAndNotifyDrawings`.
+                      drawingToolsRepo: configModel.startWithDataFitMode
+                          ? drawingToolModel.emptyDrawingToolsRepo
+                          : drawingToolModel.drawingToolsRepo,
                       drawingTools: drawingToolModel.drawingTools,
                       indicatorsRepo: indicatorsModel.indicatorsRepo,
                       dataFitEnabled: configModel.startWithDataFitMode,

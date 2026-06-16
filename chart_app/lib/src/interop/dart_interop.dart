@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:js_interop';
 import 'package:web/web.dart' as web;
 import 'dart:js_interop_unsafe';
@@ -23,7 +24,10 @@ class AppWrapper {
   double getXAxisHeight() => _app.xAxisHeight;
   double getYAxisWidth() => _app.yAxisWidth;
   double getCurrentTickWidth() => _app.currentTickWidth;
-  void newChart(JSNewChart payload) => _app.newChart(payload);
+  // ChartApp.newChart is async (it awaits chart-ready before loading
+  // saved drawings), but the JS bridge stays fire-and-forget — JS does not
+  // await it. unawaited() makes that explicit for the analyzer.
+  void newChart(JSNewChart payload) => unawaited(_app.newChart(payload));
   List<dynamic>? getTooltipContent(int epoch, int pipSize) =>
       _app.getTooltipContent(epoch, pipSize);
   int? getIndicatorHoverIndex(double x, double y, Function getClosestEpoch,
@@ -91,12 +95,11 @@ class ChartConfigWrapper {
   void updateChartStyle(String style) => _model.updateChartStyle(style);
   void setRemainingTime(String time) => _model.setRemainingTime(time);
   void updateContracts(JSAny contracts) {
-    final List<JSContractsUpdate> contractsList =
-        (contracts as JSArray<JSAny>)
-            .toDart
-            .whereType<JSAny>()
-            .map((JSAny c) => c as JSContractsUpdate)
-            .toList();
+    final List<JSContractsUpdate> contractsList = (contracts as JSArray<JSAny>)
+        .toDart
+        .whereType<JSAny>()
+        .map((JSAny c) => c as JSContractsUpdate)
+        .toList();
     _model.updateContracts(contractsList);
   }
 
@@ -106,9 +109,11 @@ class ChartConfigWrapper {
   void updateLeftMargin(double? margin) {
     if (margin != null) _model.updateLeftMargin(margin);
   }
+
   void updateRightPadding(int? padding) {
     if (padding != null) _model.updateRightPadding(padding);
   }
+
   void toggleTimeIntervalVisibility(bool visible) =>
       _model.toggleTimeIntervalVisibility(visible);
   void setSymbolClosed(bool closed) => _model.setSymbolClosed(closed);

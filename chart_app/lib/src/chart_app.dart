@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math';
 
 import 'package:chart_app/src/interop/js_interop.dart';
@@ -48,11 +49,23 @@ class ChartApp {
   /// Whether chart is mounted or not.
   bool isMounted = false;
 
+  /// Completes once the chart is mounted (feed loaded + first frame painted).
+  /// Awaiting [chartReady] is the proper signal for any operation that needs
+  /// the price-axis coordinate system / render surface to exist — e.g. loading
+  /// saved drawing tools. Reset on every [newChart] so symbol switches re-arm.
+  Completer<void> _chartReadyCompleter = Completer<void>();
+
+  /// Future that resolves when the chart is ready to accept render-dependent ops.
+  Future<void> get chartReady => _chartReadyCompleter.future;
+
   void _processChartVisibilityChange(bool showChart) {
     if (showChart) {
       /// To prevent controller functions being called before mount.
       WidgetsBinding.instance.addPostFrameCallback((_) {
         isMounted = true;
+        if (!_chartReadyCompleter.isCompleted) {
+          _chartReadyCompleter.complete();
+        }
       });
     } else {
       isMounted = false;
@@ -72,10 +85,42 @@ class ChartApp {
   }
 
   /// Initialize new chart
-  void newChart(JSNewChart payload) {
+  Future<void> newChart(JSNewChart payload) async {
+    // Re-arm the readiness gate for the new chart instance. The previous
+    // completer may already have fired for an earlier chart; we want a fresh
+    // one that completes when THIS chart's first frame is painted. If a prior
+    // newChart is still pending (rapid symbol switch), it shares this same
+    // completer — both calls resolve when the chart mounts and both run
+    // loadAndNotifyDrawings against the latest symbol, which is redundant but
+    // correct (the latest call's `drawingToolModel.symbol` wins).
+    if (_chartReadyCompleter.isCompleted) {
+      _chartReadyCompleter = Completer<void>();
+    }
+
+    // Force the next visibility-change detection in [getChartVisibilitity] to
+    // fire. On symbol switch the JS side calls `app.newChart` and
+    // `feed.onTickHistory` back-to-back, so `feedLoadedNotifier` flips
+    // false → true within the same microtask batch — no frame ever renders
+    // with showChart=false. Without resetting this, the next frame would see
+    // showChart unchanged (true → true), skip [_processChartVisibilityChange]
+    // entirely, and [_chartReadyCompleter] would hang forever — leaving the
+    // previous symbol's drawings stuck in the InteractiveLayer's local state.
+    _prevShowChart = false;
+
     configModel.newChart(payload);
     drawingToolModel.newChart(payload);
     feedModel.newChart();
+
+    // Defer drawing-tool load until the chart's render surface and feed are
+    // live.
+    await chartReady;
+
+    // Contract-details charts mount with `startWithDataFitMode=true`
+    // and are wired to the empty drawing-tools repo in `deriv_chart_wrapper`,
+    // so they must never have anything render.
+    if (!payload.startWithDataFitMode) {
+      await drawingToolModel.loadAndNotifyDrawings();
+    }
   }
 
   /// Calculates the width of yAxis and sets the height of xAxis
