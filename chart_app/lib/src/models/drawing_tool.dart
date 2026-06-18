@@ -67,6 +67,8 @@ class DrawingToolModel {
   /// awaiting `chartReady` and then invoking [loadAndNotifyDrawings].
   void newChart(JSNewChart payload) {
     symbol = payload.symbol ?? '';
+    // Deselect any drawing so the next mount starts in InteractiveNormalState.
+    interactiveLayerBehaviour.resetToNormalState();
   }
 
   /// Loads drawings for the current [symbol] from SharedPreferences and

@@ -208,6 +208,7 @@ export default class DrawToolsStore {
     // Callback that runs when the chart is loaded
     onLoad(drawings: TDrawingCreatedConfig[]) {
         this.activeToolsGroup = [];
+        this.hideDrawingConfirmation();
 
         drawings.forEach((item: TDrawingCreatedConfig) => {
             if (typeof item === 'string') {
