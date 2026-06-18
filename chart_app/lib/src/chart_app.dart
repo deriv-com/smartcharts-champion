@@ -37,6 +37,12 @@ class ChartApp {
 
   bool _prevShowChart = false;
 
+  /// Monotonic counter bumped on every [newChart]. A `newChart` coroutine
+  /// captures its generation before awaiting [chartReady]; if a later
+  /// `newChart` has since superseded it, the stale coroutine bails out instead
+  /// of loading drawings for an outdated payload/symbol.
+  int _chartGeneration = 0;
+
   /// height of xAxis
   double xAxisHeight = 24;
 
@@ -86,13 +92,21 @@ class ChartApp {
 
   /// Initialize new chart
   Future<void> newChart(JSNewChart payload) async {
+    final int generation = ++_chartGeneration;
+
     // Re-arm the readiness gate for the new chart instance. The previous
     // completer may already have fired for an earlier chart; we want a fresh
-    // one that completes when THIS chart's first frame is painted. If a prior
-    // newChart is still pending (rapid symbol switch), it shares this same
-    // completer — both calls resolve when the chart mounts and both run
-    // loadAndNotifyDrawings against the latest symbol, which is redundant but
-    // correct (the latest call's `drawingToolModel.symbol` wins).
+    // one that completes when THIS chart's first frame is painted.
+    //
+    // We deliberately only swap in a fresh completer when the previous one has
+    // already completed. If a prior `newChart` is still pending (rapid symbol
+    // switch, or a feed-load that never arrived because JS threw between its
+    // paired `app.newChart` / `feed.onTickHistory` calls), it is suspended on
+    // THIS completer instance — replacing it would orphan that coroutine on a
+    // future that can never complete, hanging it forever. By sharing the
+    // completer, the pending call resolves alongside this one when the chart
+    // mounts; the `generation` guard below then ensures only the latest
+    // `newChart` actually loads drawings.
     if (_chartReadyCompleter.isCompleted) {
       _chartReadyCompleter = Completer<void>();
     }
@@ -114,6 +128,14 @@ class ChartApp {
     // Defer drawing-tool load until the chart's render surface and feed are
     // live.
     await chartReady;
+
+    // A newer newChart() superseded this one while we were awaiting readiness
+    // (e.g. the user switched symbol again, or navigated to the contract-details
+    // chart which mounts with a different payload). Bail so we don't load this
+    // payload's drawings on top of — or against the symbol of — the newer chart.
+    if (generation != _chartGeneration) {
+      return;
+    }
 
     // Contract-details charts mount with `startWithDataFitMode=true`
     // and are wired to the empty drawing-tools repo in `deriv_chart_wrapper`,
