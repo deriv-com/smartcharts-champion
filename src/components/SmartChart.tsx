@@ -9,7 +9,7 @@ const SmartChart = React.forwardRef<
 >(({ children, ...props }, ref) => {
     const is_context_intialized = React.useRef(false);
     if (!is_context_intialized.current) {
-        initContext();
+        initContext(props.settings);
         is_context_intialized.current = true;
     }
 

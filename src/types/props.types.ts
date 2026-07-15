@@ -20,6 +20,8 @@ declare global {
     interface Window {
         flutterChart: TFlutterChart;
         flutterChartElement: HTMLElement;
+        /** Current chart theme ('light' | 'dark'), read by the Flutter engine at bootstrap so its first frame matches the host theme */
+        flutterChartTheme?: string;
         _flutter: {
             loader: {
                 /** New Flutter 3.x API — handles WASM + JS build selection */
