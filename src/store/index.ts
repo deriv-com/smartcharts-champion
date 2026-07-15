@@ -24,7 +24,7 @@ import HighestLowestStore from './HighestLowestStore';
 import PaginationLoaderStore from './PaginationLoaderStore';
 import ToolbarWidgetStore from './ToolbarWidgetStore';
 import ScrollStore from './ScrollStore';
-import { TMainStore } from '../types';
+import { TMainStore, TSettings } from '../types';
 import ChartAdapterStore from './ChartAdapterStore';
 
 export default class MainStore implements TMainStore {
@@ -57,8 +57,11 @@ export default class MainStore implements TMainStore {
 
 let stores_context: React.Context<TMainStore>;
 
-export const initContext = (): void => {
+export const initContext = (initialSettings?: TSettings): void => {
     const root_store = new MainStore();
+    // Seed the theme before the context (and thus the first render) exists, so the
+    // initial paint already carries the host's theme instead of the light default.
+    root_store.chartSetting.setInitialTheme(initialSettings?.theme);
     stores_context = React.createContext<TMainStore>(root_store);
 };
 

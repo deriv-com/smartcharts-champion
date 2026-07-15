@@ -35,6 +35,7 @@ export default class ChartSettingStore {
             minimumLeftBars: observable,
             updateActiveLanguage: action.bound,
             setLanguage: action.bound,
+            setInitialTheme: action.bound,
             setTheme: action.bound,
             setPosition: action.bound,
             showCountdown: action.bound,
@@ -211,11 +212,30 @@ export default class ChartSettingStore {
         }
         this.saveSetting();
     }
+    /**
+     * Seeds the theme at store construction, before the first render commits,
+     * so the chart never paints its default light theme for a frame when the
+     * host mounts it in dark mode. Unlike setTheme, this must not trigger the
+     * settings-save/GA side effects — the value comes from the host, not the user.
+     */
+    setInitialTheme(theme?: string) {
+        if (theme && this.theme !== theme) {
+            this.theme = theme;
+            // A reused engine (window.flutterChartElement survives remounts) keeps
+            // the theme from its previous mount; sync it here because setTheme()
+            // will see an unchanged value later and early-return.
+            this.mainStore.chartAdapter.updateTheme(theme);
+        }
+        // A cold engine reads this global at bootstrap so its very first frame
+        // is painted with the correct theme instead of the Dart light default.
+        window.flutterChartTheme = this.theme;
+    }
     setTheme(theme: string) {
         if (this.theme === theme) {
             return;
         }
         this.theme = theme;
+        window.flutterChartTheme = theme;
 
         this.mainStore.drawTools.updateTheme();
 
