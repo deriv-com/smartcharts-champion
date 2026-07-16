@@ -32,12 +32,21 @@ jobs:
             checks: write
             pull-requests: write
         steps:
+            - name: Mint GitHub App token
+              id: app-token
+              uses: actions/create-github-app-token@v1
+              with:
+                  app-id: ${{ secrets.CLIENT_ID_GHAPP }}
+                  private-key: ${{ secrets.PRIVATE_KEY_GHAPP }}
+                  owner: deriv-com
+                  repositories: derivatives-trader
+
             - name: Verify user
               if: github.event_name == 'pull_request'
               uses: 'deriv-com/shared-actions/.github/actions/verify_user_in_organization@v3'
               with:
                   username: ${{ github.event.pull_request.user.login }}
-                  token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+                  token: ${{ steps.app-token.outputs.token }}
 
             - name: Post preview build comment
               if: github.event_name == 'pull_request'
@@ -61,7 +70,7 @@ jobs:
                   repository: deriv-com/derivatives-trader
                   path: derivatives-trader
                   ref: master
-                  token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+                  token: ${{ steps.app-token.outputs.token }}
                   persist-credentials: false
 
             - name: Setup Flutter
