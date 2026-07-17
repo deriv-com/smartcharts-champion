@@ -219,16 +219,23 @@ export default class ChartSettingStore {
      * settings-save/GA side effects — the value comes from the host, not the user.
      */
     setInitialTheme(theme?: string) {
-        if (theme && this.theme !== theme) {
-            this.theme = theme;
-            // A reused engine (window.flutterChartElement survives remounts) keeps
-            // the theme from its previous mount; sync it here because setTheme()
-            // will see an unchanged value later and early-return.
-            this.mainStore.chartAdapter.updateTheme(theme);
-        }
+        // On a warm remount (e.g. mobile Trade -> Menu -> Trade) the JS store is
+        // rebuilt with the default 'light' theme, but the Flutter engine and the
+        // window.flutterChartTheme global survive. Resolve the real target from
+        // the host prop first, then the last-known global, then the store default,
+        // so we never regress a dark chart to light just because the fresh store
+        // hasn't been told the current theme yet.
+        const resolvedTheme = theme || window.flutterChartTheme || this.theme;
+        this.theme = resolvedTheme;
         // A cold engine reads this global at bootstrap so its very first frame
         // is painted with the correct theme instead of the Dart light default.
-        window.flutterChartTheme = this.theme;
+        window.flutterChartTheme = resolvedTheme;
+        // Always push to the (possibly warm) engine, without an equality guard:
+        // it retains the theme from its previous mount, and setTheme() will later
+        // early-return on an unchanged value. initContext runs during render,
+        // before onMount reattaches the canvas, so the engine repaints the correct
+        // theme before it becomes visible again — preventing the wrong-theme flash.
+        this.mainStore.chartAdapter.updateTheme(resolvedTheme);
     }
     setTheme(theme: string) {
         if (this.theme === theme) {
