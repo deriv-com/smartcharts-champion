@@ -139,9 +139,12 @@ import Vol50 from '../../sass/icons/active-symbols/volatility/50 index/ic-50-ind
 import Vol75 from '../../sass/icons/active-symbols/volatility/75 index/ic-75-index-v.svg';
 import Vol100 from '../../sass/icons/active-symbols/volatility/100 index/ic-100-index-v.svg';
 import Vol1S10 from '../../sass/icons/active-symbols/volatility/1s10 index/ic-10-1s-index.svg';
+import Vol1S15 from '../../sass/icons/active-symbols/volatility/1s15 index/ic-15-1s-index.svg';
 import Vol1S25 from '../../sass/icons/active-symbols/volatility/1s25 index/light-25(1s)index.svg';
+import Vol1S30 from '../../sass/icons/active-symbols/volatility/1s30 index/ic-30-1s-index.svg';
 import Vol1S50 from '../../sass/icons/active-symbols/volatility/1s50 index/light-50(1s) index.svg';
 import Vol1S75 from '../../sass/icons/active-symbols/volatility/1s75 index/light-75(1s) index.svg';
+import Vol1S90 from '../../sass/icons/active-symbols/volatility/1s90 index/ic-90-1s-index.svg';
 import Vol1S100 from '../../sass/icons/active-symbols/volatility/1s100 index/ic-100-1s-index.svg';
 import Vol1S150 from '../../sass/icons/active-symbols/volatility/1s150 index/ic-150-1s-index.svg';
 import Vol1S200 from '../../sass/icons/active-symbols/volatility/1s200 index/ic-200-1s-index.svg';
@@ -157,6 +160,8 @@ import Boom500 from '../../sass/icons/active-symbols/volatility/boom500 index/bo
 import Boom600 from '../../sass/icons/active-symbols/volatility/boom600 index/boom600 index.svg';
 import Boom900 from '../../sass/icons/active-symbols/volatility/boom900 index/boom900 index.svg';
 import Boom1000 from '../../sass/icons/active-symbols/volatility/boom1000 index/boom1000 index.svg';
+import RangeBreak100 from '../../sass/icons/active-symbols/volatility/range break 100 index/range break 100 index.svg';
+import RangeBreak200 from '../../sass/icons/active-symbols/volatility/range break 200 index/range break 200 index.svg';
 import MarketBear from '../../sass/icons/active-symbols/volatility/bear market/ic-marketbear.svg';
 import MarketBull from '../../sass/icons/active-symbols/volatility/bull market/ic-marketbull.svg';
 import Step100 from '../../sass/icons/active-symbols/volatility/step index/step-100-index.svg';
@@ -530,9 +535,12 @@ export const ItemIconMap = {
     R_75: Wrapper(Vol75),
     R_100: Wrapper(Vol100),
     '1HZ10V': Wrapper(Vol1S10),
+    '1HZ15V': Wrapper(Vol1S15),
     '1HZ25V': Wrapper(Vol1S25),
+    '1HZ30V': Wrapper(Vol1S30),
     '1HZ50V': Wrapper(Vol1S50),
     '1HZ75V': Wrapper(Vol1S75),
+    '1HZ90V': Wrapper(Vol1S90),
     '1HZ100V': Wrapper(Vol1S100),
     '1HZ150V': Wrapper(Vol1S150),
     '1HZ200V': Wrapper(Vol1S200),
@@ -548,6 +556,8 @@ export const ItemIconMap = {
     CRASH600: Wrapper(Crash600),
     CRASH900: Wrapper(Crash900),
     CRASH1000: Wrapper(Crash1000),
+    RB100: Wrapper(RangeBreak100),
+    RB200: Wrapper(RangeBreak200),
     RDBEAR: Wrapper(MarketBear),
     RDBULL: Wrapper(MarketBull),
     stpRNG: Wrapper(Step100),
