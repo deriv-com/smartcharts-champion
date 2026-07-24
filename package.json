@@ -146,7 +146,7 @@
         "stylelint-no-unsupported-browser-features": "^5.0.4",
         "stylelint-webpack-plugin": "^2.4.0",
         "svg-sprite-loader": "^6.0.11",
-        "svgo": "^3.0.2",
+        "svgo": "^3.3.4",
         "svgo-loader": "^4.0.0",
         "terser-webpack-plugin": "^5.3.16",
         "ts-node": "^10.4.0",
