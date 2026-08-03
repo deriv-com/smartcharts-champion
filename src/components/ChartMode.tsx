@@ -5,12 +5,7 @@ import { TGranularity } from 'src/types';
 import '../../sass/components/_chart-mode.scss';
 import ChartTypes from './ChartTypes';
 import { Switch } from './Form';
-import {
-    TypeAreaGrayscaleIcon,
-    TypeCandleGrayscaleIcon,
-    TypeHollowGrayscaleIcon,
-    TypeOhlcGrayscaleIcon,
-} from './Icons';
+import { ChartAreaIcon } from './Icons';
 import Menu from './Menu';
 import Timeperiod from './Timeperiod';
 import InfoFootnote from './InfoFootnote';
@@ -21,24 +16,14 @@ type TChartModeProps = {
     onGranularity: (granularity?: TGranularity) => void;
 };
 
-const TypeMap = {
-    line: TypeAreaGrayscaleIcon,
-    candles: TypeCandleGrayscaleIcon,
-    ohlc: TypeOhlcGrayscaleIcon,
-    hollow: TypeHollowGrayscaleIcon,
-};
-
 const ChartMode = ({ onChartType, onGranularity, portalNodeId = '' }: TChartModeProps) => {
-    const { chart, chartMode, chartType, timeperiod, state, chartSetting } = useStores();
+    const { chart, chartMode, timeperiod, state, chartSetting } = useStores();
     const { menuStore } = chartMode;
     const { allowTickChartTypeOnly } = state;
     const { isMobile } = chart;
-    const { type } = chartType;
     const { display: displayInterval } = timeperiod;
     const { isSmoothChartEnabled, toggleSmoothChart } = chartSetting;
     const menuOpen = chartMode.menuStore.open;
-
-    const TypeIcon = TypeMap[type.id as keyof typeof TypeMap];
 
     return (
         <Menu
@@ -52,13 +37,8 @@ const ChartMode = ({ onChartType, onGranularity, portalNodeId = '' }: TChartMode
         >
             <Menu.Title>
                 <div className={classNames('sc-chart-mode__menu', { 'sc-chart-mode__menu--active': menuOpen })}>
-                    {isMobile && <span className='sc-chart-mode__menu__duration'>{displayInterval}</span>}
-                    {!isMobile && (
-                        <>
-                            <span className='sc-chart-mode__menu__timeperiod'>{displayInterval}</span>
-                            <TypeIcon tooltip-title={t.translate(type.text)} />
-                        </>
-                    )}
+                    <ChartAreaIcon />
+                    {displayInterval && <span className='sc-chart-mode__menu__interval'>{displayInterval}</span>}
                 </div>
             </Menu.Title>
             <Menu.Body>

@@ -7,7 +7,15 @@ import StudyLegendStore from 'src/store/StudyLegendStore';
 import NotificationBadge from './NotificationBadge';
 import Tooltip from './Tooltip';
 import Scroll from './Scroll';
-import { IndicatorIcon, ActiveIcon, EmptyStateIcon, SettingIcon, DeleteIcon, InfoCircleIcon, BackIcon } from './Icons';
+import {
+    ChartIndicatorsIcon,
+    ActiveIcon,
+    EmptyStateIcon,
+    SettingIcon,
+    DeleteIcon,
+    InfoCircleIcon,
+    BackIcon,
+} from './Icons';
 import '../../sass/components/_studylegend.scss';
 import { STATE, TooltipsContent, getIndicatorCategoryName } from '../Constant';
 import Menu from './Menu';
@@ -340,7 +348,7 @@ const StudyLegend = ({ portalNodeId }: TStudyLegendProps) => {
         >
             <Menu.Title>
                 <div className={`sc-studies__menu ${menuOpen ? 'sc-studies__menu--active' : ''}`}>
-                    <IndicatorIcon />
+                    <ChartIndicatorsIcon />
                     <NotificationBadge notificationCount={activeStudiesNo} />
                 </div>
             </Menu.Title>

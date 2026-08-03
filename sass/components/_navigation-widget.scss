@@ -1,19 +1,55 @@
 /*! rtl:begin:ignore */
 .sc-navigation-widget {
     direction: ltr;
-    width: 32px;
     position: absolute;
-    bottom: 80px;
-    left: 13px;
+    bottom: 48px;
+    left: 50%;
+    transform: translateX(-50%);
     z-index: 4;
 
+    &__buttons {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        gap: 8px;
+    }
     &__item {
-        &--scale {
-            margin-bottom: 8px;
+        position: relative;
+        width: 32px;
+        height: 32px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: none;
+        box-shadow: none;
+        border-radius: 50%;
+        cursor: pointer;
+        backdrop-filter: blur(4px);
+        -webkit-backdrop-filter: blur(4px);
+        transition: none;
+        @include themify($themes) {
+            background-color: themed('ToolbarWidgetMobileBg');
         }
-        &--zoom {
-            .ic-icon:first-child {
-                margin-bottom: 2px;
+
+        &:hover {
+            @include themify($themes) {
+                background-color: themed('ToolbarWidgetItemHoverBg');
+            }
+        }
+        .ic-icon {
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            svg {
+                width: 24px;
+                height: 24px;
+                stroke: none;
+                @include themify($themes) {
+                    fill: themed('ToolbarWidgetItemIcon');
+                }
             }
         }
         &--hidden {
@@ -23,27 +59,11 @@
             opacity: 0.5;
             pointer-events: none;
         }
-        .ic-icon {
-            width: 32px;
-            height: 32px;
-            border-radius: $border-radius;
-            cursor: pointer;
-            margin: auto;
-            line-height: 41px;
-            transition: none;
-            @include themify($themes) {
-                background-color: themed('NavigationWidgetBg');
-            }
+    }
 
-            svg {
-                @include themify($themes) {
-                    fill: themed('NavigationWidgetColor');
-                }
-            }
-        }
+    // Shift the widget up when the historical date picker is present
+    &--indent {
+        bottom: 78px;
     }
 }
 /*! rtl:end:ignore */
-.smartcharts-mobile .sc-navigation-widget__item--indent {
-    margin-bottom: calc(10% - 1rem);
-}
