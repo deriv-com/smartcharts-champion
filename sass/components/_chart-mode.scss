@@ -7,28 +7,30 @@
 
         .ic-icon {
             margin: auto;
-            width: 16px;
-            height: 16px;
-            top: -4px;
             position: relative;
 
             svg {
                 stroke: none !important;
-                width: 16px !important;
-                height: 16px !important;
-                @include themify($themes) {
-                    fill: themed('ChartModeText') !important;
-                }
             }
         }
-        &__timeperiod {
+        // "5m"-style interval badge pinned to the top-right of the chart-type button
+        &__interval {
             position: absolute;
-            top: -9px;
-            left: 4px;
-            font-size: 8px;
-            font-weight: bold;
+            top: -5px;
+            left: 22px;
+            padding: 4px 3px;
+            border-radius: 2px;
+            font-size: 10px;
+            font-weight: 700;
+            line-height: 6px;
+            text-align: center;
+            white-space: nowrap;
+            text-transform: lowercase;
+            word-spacing: -0.3em;
+            pointer-events: none;
             @include themify($themes) {
-                color: themed('ChartModeText') !important;
+                background: themed('IntervalBadgeBg');
+                color: themed('IntervalBadgeColor');
             }
         }
     }
@@ -82,21 +84,6 @@
     }
 }
 
-.sc-toolbar-widget {
-    .sc-chart-mode__menu {
-        padding: 8px;
-    }
-    .sc-chart-mode__menu__timeperiod {
-        top: 3px;
-        left: 8px;
-    }
-
-    @media screen and (max-width: 600px) {
-        display: flex;
-        width: auto !important;
-    }
-}
-
 .smartcharts-mobile {
     .sc-chart-mode .sc-dialog {
         width: 300px;
@@ -104,43 +91,5 @@
         max-height: 555px;
         height: calc(100% - 32px);
         overflow-x: inherit;
-    }
-    .sc-dtools__menu,
-    .sc-chart-mode__menu {
-        padding: 4px !important;
-        height: 32px !important;
-        width: 32px !important;
-        border-radius: 32px;
-        backdrop-filter: blur(4px);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 8px;
-
-        @include themify($themes) {
-            background: themed('ToolbarWidgetMobileBg');
-        }
-
-        .sc-notification-badge {
-            height: 8px;
-            width: 8px;
-            font-size: 0px;
-            right: 4px;
-        }
-    }
-    .sc-chart-mode__menu__timeperiod {
-        display: none;
-    }
-    .sc-chart-mode__menu__duration {
-        text-align: center;
-        font-size: 14px;
-        font-style: normal;
-        line-height: 20px;
-        white-space: nowrap;
-        text-transform: lowercase;
-        word-spacing: -0.3em;
-        @include themify($themes) {
-            color: themed('ChartModeText');
-        }
     }
 }

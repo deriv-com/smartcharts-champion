@@ -6,7 +6,7 @@ import { useStores } from 'src/store';
 import DrawToolsStore from 'src/store/DrawToolsStore';
 import { ArrayElement, TIcon, TMainStore } from 'src/types';
 import '../../sass/components/_draw_tools.scss';
-import { ActiveIcon, DeleteIcon, DrawToolIcon, DrawToolMobileIcon, EmptyStateIcon } from './Icons';
+import { ActiveIcon, DeleteIcon, DrawingToolsIcon, DrawToolIcon, EmptyStateIcon } from './Icons';
 import Menu from './Menu';
 import NotificationBadge from './NotificationBadge';
 import Scroll from './Scroll';
@@ -160,7 +160,7 @@ const DrawTools = ({ portalNodeId }: DrawToolsProps) => {
         >
             <Menu.Title>
                 <div className={classNames('sc-dtools__menu', { 'sc-dtools__menu--active': menuOpen })}>
-                    {isMobile ? <DrawToolMobileIcon /> : <DrawToolIcon />}
+                    <DrawingToolsIcon />
                     <NotificationBadge notificationCount={activeDrawToolsItemsNo} />
                 </div>
             </Menu.Title>

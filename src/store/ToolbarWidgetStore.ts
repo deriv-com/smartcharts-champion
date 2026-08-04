@@ -1,8 +1,9 @@
-import { action, reaction, makeObservable } from 'mobx';
+import { action, observable, reaction, makeObservable } from 'mobx';
 import MainStore from '.';
 
 export default class ToolbarWidgetStore {
     mainStore: MainStore;
+    isExpanded = false; // Mobile: whether the vertical-ellipsis menu is expanded
     get crosshairStore() {
         return this.mainStore.crosshair;
     }
@@ -12,6 +13,9 @@ export default class ToolbarWidgetStore {
 
     constructor(mainStore: MainStore) {
         makeObservable(this, {
+            isExpanded: observable,
+            toggleExpanded: action.bound,
+            collapse: action.bound,
             onMouseEnter: action.bound,
             onMouseLeave: action.bound,
         });
@@ -36,9 +40,19 @@ export default class ToolbarWidgetStore {
                     !this.mainStore.view.menuStore.open
                 ) {
                     this.onMouseLeave();
+                    // Collapse the mobile ellipsis menu once every dialog is closed
+                    this.collapse();
                 }
             }
         );
+    }
+
+    toggleExpanded() {
+        this.isExpanded = !this.isExpanded;
+    }
+
+    collapse() {
+        this.isExpanded = false;
     }
 
     onMouseEnter() {

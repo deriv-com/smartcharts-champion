@@ -1,7 +1,7 @@
 import classNames from 'classnames';
 import { observer } from 'mobx-react-lite';
 import { useStores } from 'src/store';
-import { DownloadIcon, PngIcon, CsvIcon } from './Icons';
+import { ChartDownloadIcon, PngIcon, CsvIcon } from './Icons';
 import { InlineLoader } from './Loader';
 import '../../sass/components/_download.scss';
 import Menu from './Menu';
@@ -27,7 +27,7 @@ const Share = ({ portalNodeId }: TShareProps) => {
         >
             <Menu.Title>
                 <div className={classNames('sc-download__menu', { 'sc-download__menu--active': menuOpen })}>
-                    <DownloadIcon />
+                    <ChartDownloadIcon />
                 </div>
             </Menu.Title>
             <Menu.Body>

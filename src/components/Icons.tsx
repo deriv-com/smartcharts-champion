@@ -57,7 +57,7 @@ import PositionBottom from '../../sass/icons/chart settings/setting/ic-position-
 import Back from '../../sass/icons/back/ic-back.svg';
 import DrawCursor from '../../sass/icons/pencil/ic-pencil.svg';
 import DrawTool from '../../sass/icons/common/ic-drawing-tool.svg';
-import DrawToolMobile from '../../sass/icons/common/ic-drawing-tool-mobile.svg';
+import ChartIndicators from '../../sass/icons/common/ic-chart-indicators.svg';
 
 import HelpCenter from '../../sass/icons/common/ic-help-center.svg';
 import Download from '../../sass/icons/common/ic-download.svg';
@@ -74,6 +74,15 @@ import Home from '../../sass/icons/navigation-widgets/ic-home.svg';
 import Scale from '../../sass/icons/navigation-widgets/ic-scale-full.svg';
 import Zoomin from '../../sass/icons/navigation-widgets/ic-zoomin.svg';
 import Zoomout from '../../sass/icons/navigation-widgets/ic-zoomout.svg';
+
+import ChartArea from '../../sass/icons/common/ic-chart-settings.svg';
+import EllipsisVertical from '../../sass/icons/common/ic-vertical-ellipsis.svg';
+import DrawingTools from '../../sass/icons/common/ic-chart-drawing.svg';
+import ChartDownload from '../../sass/icons/common/ic-chart-download.svg';
+import ChartCrosshairEnabled from '../../sass/icons/common/ic-chart-crosshair-enabled.svg';
+import ChartCrosshairDisabled from '../../sass/icons/common/ic-crosshair-disabled.svg';
+import ChartPlus from '../../sass/icons/common/ic-chart-plus.svg';
+import ChartMinus from '../../sass/icons/common/ic-chart-minus.svg';
 
 import TypeArea from '../../sass/icons/chart-type/ic-area.svg';
 import TypeCandle from '../../sass/icons/chart-type/ic-candle.svg';
@@ -316,7 +325,7 @@ export const DrawingCursorIcon = Wrapper(DrawCursor);
 export const ThemeLightIcon = Wrapper(ThemeLight);
 export const ThemeDarkIcon = Wrapper(ThemeDark);
 export const DrawToolIcon = Wrapper(DrawTool);
-export const DrawToolMobileIcon = Wrapper(DrawToolMobile);
+export const ChartIndicatorsIcon = Wrapper(ChartIndicators);
 export const ActiveIcon = Wrapper(Active);
 export const FullScreenIcon = Wrapper(FullScreen);
 
@@ -376,6 +385,14 @@ export const HomeIcon = Wrapper(Home);
 export const ScaleIcon = Wrapper(Scale);
 export const ZoominIcon = Wrapper(Zoomin);
 export const ZoomoutIcon = Wrapper(Zoomout);
+export const ChartAreaIcon = Wrapper(ChartArea);
+export const EllipsisVerticalIcon = Wrapper(EllipsisVertical);
+export const DrawingToolsIcon = Wrapper(DrawingTools);
+export const ChartDownloadIcon = Wrapper(ChartDownload);
+export const ChartCrosshairEnabledIcon = Wrapper(ChartCrosshairEnabled);
+export const ChartCrosshairDisabledIcon = Wrapper(ChartCrosshairDisabled);
+export const ChartPlusIcon = Wrapper(ChartPlus);
+export const ChartMinusIcon = Wrapper(ChartMinus);
 
 export const LanguageIcon = Wrapper(Language);
 export const ThemeIcon = Wrapper(Theme);
