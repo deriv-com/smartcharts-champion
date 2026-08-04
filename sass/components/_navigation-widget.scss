@@ -27,6 +27,14 @@
         backdrop-filter: blur(4px);
         -webkit-backdrop-filter: blur(4px);
         transition: none;
+        // Reset native <button> styling so the items render identically to the
+        // surrounding icon buttons.
+        margin: 0;
+        padding: 0;
+        font: inherit;
+        color: inherit;
+        appearance: none;
+        -webkit-appearance: none;
         @include themify($themes) {
             background-color: themed('ToolbarWidgetMobileBg');
         }
@@ -35,6 +43,15 @@
             @include themify($themes) {
                 background-color: themed('ToolbarWidgetItemHoverBg');
             }
+        }
+        &:focus {
+            outline: none;
+        }
+        &:focus-visible {
+            @include themify($themes) {
+                outline: 2px solid themed('ToolbarWidgetItemIcon');
+            }
+            outline-offset: 2px;
         }
         .ic-icon {
             width: 24px;
@@ -55,10 +72,18 @@
         &--hidden {
             display: none;
         }
-        &--disabled {
+        &--disabled,
+        &:disabled {
             opacity: 0.5;
             pointer-events: none;
         }
+    }
+
+    // Tooltip wrapper around the crosshair button. The tooltip bubble is
+    // absolutely positioned, so the wrapper has to be the positioning context.
+    .sc-crosshair-toggle {
+        position: relative;
+        display: flex;
     }
 
     // Shift the widget up when the historical date picker is present

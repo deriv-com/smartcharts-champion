@@ -24,22 +24,35 @@ const NavigationWidget = () => {
             onMouseLeave={onMouseLeave}
         >
             <div className='sc-navigation-widget__buttons'>
-                <div
+                <button
+                    type='button'
                     className={classNames('sc-navigation-widget__item', 'sc-navigation-widget__item--scale', {
                         'sc-navigation-widget__item--hidden': !startWithDataFitMode,
                         'sc-navigation-widget__item--disabled': isDataFitModeEnabled,
                     })}
+                    aria-label={t.translate('Scale to fit data')}
+                    disabled={isDataFitModeEnabled}
                     onClick={toggleDataFitMode}
                 >
                     <ScaleIcon />
-                </div>
-                <div className='sc-navigation-widget__item' onClick={zoomOut}>
+                </button>
+                <button
+                    type='button'
+                    className='sc-navigation-widget__item'
+                    aria-label={t.translate('Zoom out')}
+                    onClick={zoomOut}
+                >
                     <ChartMinusIcon />
-                </div>
+                </button>
                 <CrosshairToggle />
-                <div className='sc-navigation-widget__item' onClick={zoomIn}>
+                <button
+                    type='button'
+                    className='sc-navigation-widget__item'
+                    aria-label={t.translate('Zoom in')}
+                    onClick={zoomIn}
+                >
                     <ChartPlusIcon />
-                </div>
+                </button>
             </div>
         </div>
     ) : null;

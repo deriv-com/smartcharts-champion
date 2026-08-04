@@ -1,5 +1,4 @@
 /* eslint-disable react/react-in-jsx-scope */
-import classNames from 'classnames';
 import { observer } from 'mobx-react-lite';
 import { useStores } from 'src/store';
 import { ChartCrosshairDisabledIcon, ChartCrosshairEnabledIcon } from './Icons';
@@ -14,16 +13,15 @@ const CrosshairToggle = () => {
     const crosshairLabel = crosshair.isEnabled ? t.translate('Disable Crosshair') : t.translate('Enable Crosshair');
 
     return (
-        <Tooltip
-            content={crosshairLabel}
-            enabled={!isMobile}
-            position='top'
-            className={classNames('sc-navigation-widget__item', 'sc-crosshair-toggle', {
-                'sc-crosshair-toggle--active': crosshair.isEnabled,
-            })}
-            onClick={() => crosshair.updateEnabledState(!crosshair.isEnabled)}
-        >
-            <CrosshairIcon />
+        <Tooltip content={crosshairLabel} enabled={!isMobile} position='top' className='sc-crosshair-toggle'>
+            <button
+                type='button'
+                className='sc-navigation-widget__item'
+                aria-label={crosshairLabel}
+                onClick={() => crosshair.updateEnabledState(!crosshair.isEnabled)}
+            >
+                <CrosshairIcon />
+            </button>
         </Tooltip>
     );
 };
