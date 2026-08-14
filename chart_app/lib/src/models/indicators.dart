@@ -28,15 +28,35 @@ class IndicatorsModel {
 
   /// To add or update an indicator
   void addOrUpdateIndicator(String dataString, int? index) {
-    final Map<String, dynamic> config = json.decode(dataString)..remove('id');
+    final Map<String, dynamic> config = json.decode(dataString);
+
+    // `id` is the JS side's stable identifier for this indicator instance -
+    // assigned once via getUniqueId() when it's first added, and preserved
+    // across page reloads since it's part of what JS's own saveLayout /
+    // restoreStudies round-trips. Used directly as configId - the stable
+    // identity flutter-chart's resizable indicator panels key their
+    // persisted size by - instead of being discarded. Without it, every
+    // indicator fell back to a `title#number` key that isn't guaranteed
+    // unique (`number` is never sent either, so it defaults to 0) and can't
+    // survive a reload (title/number can be recomputed differently on
+    // restore), which could both collide two panels onto the same key -
+    // corrupting the web layout's panel-size bookkeeping and pushing
+    // content past the viewport - and silently drop a resized panel's saved
+    // size after a reload.
+    final String? configId = config.remove('id') as String?;
 
     final IndicatorConfig? indicatorConfig = IndicatorConfig.fromJson(config);
 
-    if (indicatorConfig != null) {
-      index != null && index > -1
-          ? indicatorsRepo.updateAt(index, indicatorConfig)
-          : indicatorsRepo.add(indicatorConfig);
+    if (indicatorConfig == null) {
+      return;
     }
+
+    final IndicatorConfig configWithId =
+        indicatorConfig.copyWith(configId: configId);
+
+    index != null && index > -1
+        ? indicatorsRepo.updateAt(index, configWithId)
+        : indicatorsRepo.add(configWithId);
   }
 
   /// To remove an existing indicator
