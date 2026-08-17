@@ -2,9 +2,8 @@ import { observable, action, when, reaction, makeObservable } from 'mobx';
 import { TLanguage, TSettings } from 'src/types';
 import MainStore from '.';
 import Context from '../components/ui/Context';
-import { Languages, STATE, Intervals } from '../Constant';
+import { Languages } from '../Constant';
 import { LogActions, LogCategories, logEvent } from '../utils/ga';
-import { getTimeIntervalName } from '../utils';
 import MenuStore from './MenuStore';
 
 export default class ChartSettingStore {
@@ -18,7 +17,8 @@ export default class ChartSettingStore {
     historical = false;
     isAutoScale = true;
     isHighestLowestMarkerEnabled = true;
-    isSmoothChartEnabled = true;
+    // Smooth chart movement is always on; it is no longer user-configurable.
+    readonly isSmoothChartEnabled = true;
     minimumLeftBars?: number;
     whitespace?: number;
 
@@ -31,7 +31,6 @@ export default class ChartSettingStore {
             historical: observable,
             isAutoScale: observable,
             isHighestLowestMarkerEnabled: observable,
-            isSmoothChartEnabled: observable,
             minimumLeftBars: observable,
             updateActiveLanguage: action.bound,
             setLanguage: action.bound,
@@ -43,19 +42,13 @@ export default class ChartSettingStore {
             setAutoScale: action.bound,
             setWhiteSpace: action.bound,
             toggleHighestLowestMarker: action.bound,
-            toggleSmoothChart: action.bound,
             whitespace: observable,
         });
 
         this.defaultLanguage = this.languages[0];
         this.mainStore = mainStore;
         this.menuStore = new MenuStore(mainStore, { route: 'setting' });
-        
-        // Load smooth chart setting from localStorage
-        const savedSmoothChart = localStorage.getItem('is_smooth_chart_enabled');
-        if (savedSmoothChart !== null) {
-            this.isSmoothChartEnabled = savedSmoothChart === 'true';
-        }
+
         // below reaction is updating the symbols and those elements that are not updating automatically on language change.
         reaction(
             () => (this?.language as TLanguage)?.key,
@@ -91,7 +84,6 @@ export default class ChartSettingStore {
             position,
             isAutoScale,
             isHighestLowestMarkerEnabled,
-            isSmoothChartEnabled,
             theme,
             activeLanguages,
             whitespace,
@@ -127,9 +119,6 @@ export default class ChartSettingStore {
         }
         if (isHighestLowestMarkerEnabled !== undefined) {
             this.toggleHighestLowestMarker(isHighestLowestMarkerEnabled);
-        }
-        if (isSmoothChartEnabled !== undefined) {
-            this.toggleSmoothChart(isSmoothChartEnabled);
         }
         this.setWhiteSpace(whitespace);
     }
@@ -332,26 +321,5 @@ export default class ChartSettingStore {
             ` ${value ? 'Show' : 'Hide'} HighestLowestMarker.`
         );
         this.saveSetting();
-    }
-    toggleSmoothChart(value: boolean) {
-        if (this.isSmoothChartEnabled === value) {
-            return;
-        }
-        this.isSmoothChartEnabled = value;
-        
-        // Save to localStorage
-        localStorage.setItem('is_smooth_chart_enabled', value.toString());
-        
-        logEvent(LogCategories.ChartControl, LogActions.ChartSetting, ` ${value ? 'Enable' : 'Disable'} Smooth Chart.`);
-        const chart_type = this.mainStore.chartType.type;
-        const state = this.mainStore.state;
-        this.mainStore.state.stateChange(STATE.CHART_SWITCH_TOGGLE, {
-            enable_smooth_chart: value ? 'enable' : 'disable',
-            chart_type_name: chart_type.id === 'colored_bar' ? chart_type.text : chart_type.text.toLowerCase(),
-            time_interval_name: getTimeIntervalName(state.granularity, Intervals),
-        });
-        this.saveSetting();
-        // Refresh the chart to apply the new smooth chart setting
-        this.mainStore.chart.refreshChart();
     }
 }
