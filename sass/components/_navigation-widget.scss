@@ -79,11 +79,19 @@
         }
     }
 
-    // Tooltip wrapper around the crosshair button. The tooltip bubble is
-    // absolutely positioned, so the wrapper has to be the positioning context.
-    .sc-crosshair-toggle {
+    // Tooltip wrappers around the crosshair and scale buttons. The tooltip
+    // bubble is absolutely positioned, so the wrapper has to be the
+    // positioning context.
+    .sc-crosshair-toggle,
+    .sc-scale-toggle {
         position: relative;
         display: flex;
+    }
+
+    // The wrapper has to collapse with the button it wraps, otherwise it keeps
+    // occupying a flex slot (and its gap) once the scale button is hidden.
+    .sc-scale-toggle--hidden {
+        display: none;
     }
 
     // Shift the widget up when the historical date picker is present
