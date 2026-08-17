@@ -3,13 +3,14 @@ import classNames from 'classnames';
 import { observer } from 'mobx-react-lite';
 import { useStores } from 'src/store';
 import CrosshairToggle from './CrosshairToggle';
+import Tooltip from './Tooltip';
 import '../../sass/components/_navigation-widget.scss';
 
 import { ChartMinusIcon, ChartPlusIcon, ScaleIcon } from './Icons';
 
 const NavigationWidget = () => {
     const { chart, chartSize, navigationWidget, chartSetting, chartAdapter } = useStores();
-    const { context, startWithDataFitMode } = chart;
+    const { context, startWithDataFitMode, isMobile } = chart;
     const { zoomIn, zoomOut } = chartSize;
     const { historical } = chartSetting;
     const { onMouseEnter, onMouseLeave } = navigationWidget;
@@ -24,18 +25,27 @@ const NavigationWidget = () => {
             onMouseLeave={onMouseLeave}
         >
             <div className='sc-navigation-widget__buttons'>
-                <button
-                    type='button'
-                    className={classNames('sc-navigation-widget__item', 'sc-navigation-widget__item--scale', {
-                        'sc-navigation-widget__item--hidden': !startWithDataFitMode,
-                        'sc-navigation-widget__item--disabled': isDataFitModeEnabled,
+                <Tooltip
+                    content={t.translate('Scale to fit data')}
+                    enabled={!isMobile && startWithDataFitMode && !isDataFitModeEnabled}
+                    position='top'
+                    className={classNames('sc-scale-toggle', {
+                        'sc-scale-toggle--hidden': !startWithDataFitMode,
                     })}
-                    aria-label={t.translate('Scale to fit data')}
-                    disabled={isDataFitModeEnabled}
-                    onClick={toggleDataFitMode}
                 >
-                    <ScaleIcon />
-                </button>
+                    <button
+                        type='button'
+                        className={classNames('sc-navigation-widget__item', 'sc-navigation-widget__item--scale', {
+                            'sc-navigation-widget__item--hidden': !startWithDataFitMode,
+                            'sc-navigation-widget__item--disabled': isDataFitModeEnabled,
+                        })}
+                        aria-label={t.translate('Scale to fit data')}
+                        disabled={isDataFitModeEnabled}
+                        onClick={toggleDataFitMode}
+                    >
+                        <ScaleIcon />
+                    </button>
+                </Tooltip>
                 <button
                     type='button'
                     className='sc-navigation-widget__item'
