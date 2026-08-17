@@ -13,6 +13,7 @@
                 stroke: none !important;
             }
         }
+
         // "5m"-style interval badge pinned to the top-right of the chart-type button
         &__interval {
             position: absolute;
@@ -28,6 +29,7 @@
             text-transform: lowercase;
             word-spacing: -0.3em;
             pointer-events: none;
+
             @include themify($themes) {
                 background: themed('IntervalBadgeBg');
                 color: themed('IntervalBadgeColor');
@@ -36,6 +38,7 @@
     }
     &__section {
         border-radius: $border-radius;
+
         @include themify($themes) {
             background: themed('ChartModeBg');
         }
@@ -48,48 +51,15 @@
             }
         }
     }
-    &__smooth-toggle {
-        margin-top: 4px;
-        padding: 24px;
-        border-radius: $border-radius;
-        @include themify($themes) {
-            background: themed('ChartModeBg');
-            border: 1px solid themed('ChartModeBorder');
-        }
-
-        &-content {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 16px;
-        }
-        &-text {
-            flex: 1;
-        }
-        &-title {
-            font-size: 14px;
-            font-weight: 600;
-            margin-bottom: 4px;
-            @include themify($themes) {
-                color: themed('ChartModeText');
-            }
-        }
-        &-description {
-            font-size: 12px;
-            line-height: 1.4;
-            @include themify($themes) {
-                color: themed('ChartModeTextSecondary');
-            }
-        }
-    }
 }
 
 .smartcharts-mobile {
     .sc-chart-mode .sc-dialog {
         width: 300px;
         left: auto;
-        max-height: 555px;
-        height: calc(100% - 32px);
+        // Height is content-driven, capped to the viewport, so the dialog never
+        // leaves dead space below the last time interval.
+        max-height: calc(100% - 32px);
         overflow-x: inherit;
     }
 }

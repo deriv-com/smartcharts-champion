@@ -174,6 +174,7 @@ export type TSettings = {
     enabledNavigationWidget?: boolean;
     isAutoScale?: boolean;
     isHighestLowestMarkerEnabled?: boolean;
+    /** @deprecated Smooth chart movement is always enabled; this value is ignored. */
     isSmoothChartEnabled?: boolean;
     theme?: string;
     activeLanguages?: Array<string | TLanguage> | null;

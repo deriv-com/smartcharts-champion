@@ -4,7 +4,6 @@ import { useStores } from 'src/store';
 import { TGranularity } from 'src/types';
 import '../../sass/components/_chart-mode.scss';
 import ChartTypes from './ChartTypes';
-import { Switch } from './Form';
 import { ChartAreaIcon } from './Icons';
 import Menu from './Menu';
 import Timeperiod from './Timeperiod';
@@ -17,12 +16,11 @@ type TChartModeProps = {
 };
 
 const ChartMode = ({ onChartType, onGranularity, portalNodeId = '' }: TChartModeProps) => {
-    const { chart, chartMode, timeperiod, state, chartSetting } = useStores();
+    const { chart, chartMode, timeperiod, state } = useStores();
     const { menuStore } = chartMode;
     const { allowTickChartTypeOnly } = state;
     const { isMobile } = chart;
     const { display: displayInterval } = timeperiod;
-    const { isSmoothChartEnabled, toggleSmoothChart } = chartSetting;
     const menuOpen = chartMode.menuStore.open;
 
     return (
@@ -48,19 +46,6 @@ const ChartMode = ({ onChartType, onGranularity, portalNodeId = '' }: TChartMode
                     </div>
                     <div className='sc-chart-mode__section__item'>
                         <Timeperiod newDesign portalNodeId={portalNodeId} onChange={onGranularity} />
-                    </div>
-                </div>
-                <div className='sc-chart-mode__smooth-toggle'>
-                    <div className='sc-chart-mode__smooth-toggle-content'>
-                        <div className='sc-chart-mode__smooth-toggle-text'>
-                            <div className='sc-chart-mode__smooth-toggle-title'>
-                                {t.translate('Smooth chart movement')}
-                            </div>
-                            <div className='sc-chart-mode__smooth-toggle-description'>
-                                {t.translate('Performance may vary by device. Turn off if it lags.')}
-                            </div>
-                        </div>
-                        <Switch value={isSmoothChartEnabled} onChange={toggleSmoothChart} />
                     </div>
                 </div>
                 {allowTickChartTypeOnly && (
