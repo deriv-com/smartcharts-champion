@@ -249,6 +249,11 @@ class ChartState {
                 for (const symbolObj of this.mainStore.chart.processedSymbols) {
                     this.mainStore.chart.symbolMap[symbolObj.symbol] = symbolObj;
                 }
+                // Point currentActiveSymbol at the freshly processed object so a
+                // re-localised display_name reaches the title. The host often pushes
+                // re-localised activeSymbols slightly after a language switch, and
+                // without this the title would keep the old language's name.
+                this.mainStore.chart.refreshCurrentActiveSymbol();
             }
         }
 

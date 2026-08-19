@@ -5,7 +5,6 @@ import 'react-tabs/style/react-tabs.css';
 import { useStores } from 'src/store';
 import { TChartProps } from 'src/types';
 import { safeParse } from 'src/utils';
-import { usePrevious } from '../hooks';
 
 /* css + scss */
 import '../../sass/main.scss';
@@ -39,7 +38,7 @@ const Chart = React.forwardRef<
     const { settingsDialog: chartTypeSettingsDialog, isCandle, isSpline } = chartType;
     const { updateProps, isChartClosed } = state;
     const { theme, position, isHighestLowestMarkerEnabled } = chartSetting;
-    const { isActive: isLoading, show: showChart } = loader;
+    const { isActive: isLoading } = loader;
 
     const rootRef = React.useRef<HTMLDivElement>(null);
     const chartContainerRef = React.useRef<HTMLDivElement>(null);
@@ -87,13 +86,12 @@ const Chart = React.forwardRef<
         updateProps(props);
     });
 
-    const prevLang = usePrevious(t.lang);
-    React.useEffect(() => {
-        if (prevLang && prevLang !== t.lang && !isLoading) {
-            showChart?.();
-        }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [t.lang]);
+    // NOTE: do not show the loader from a `t.lang` effect here. `t.lang` only
+    // flips *inside* the translation-loaded callback that hides the loader, so a
+    // show driven off it always lands after that hide and can never be balanced —
+    // it wedges "Retrieving Chart Data..." on for good. The language-change reload
+    // (ChartSettingStore reaction -> changeSymbol -> ChartStore.newChart) already
+    // owns the loader: it arms the 2.5s loaderTimeout and hides on completion.
 
     const defaultTopWidgets = () => <ChartTitle />;
 

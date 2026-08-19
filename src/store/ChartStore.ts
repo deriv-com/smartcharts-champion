@@ -100,6 +100,7 @@ class ChartStore {
             resizeScreen: action.bound,
             setChartAvailability: action.bound,
             updateCurrentActiveSymbol: action.bound,
+            refreshCurrentActiveSymbol: action.bound,
             updateScaledOneOne: action.bound,
             processedSymbols: observable,
             symbolMap: observable,
@@ -454,6 +455,20 @@ class ChartStore {
     updateCurrentActiveSymbol(symbolObj: TProcessedSymbolItem) {
         this.currentActiveSymbol = symbolObj;
     }
+    /**
+     * Re-reads the active symbol from symbolMap so a re-localised `display_name`
+     * reaches the chart title. This is all a language change needs: the Flutter
+     * engine carries no locale, so it must never be torn down just to relabel a
+     * symbol. Called on language change and whenever the host pushes a new
+     * activeSymbols payload (which may arrive after the language switch).
+     */
+    refreshCurrentActiveSymbol() {
+        const symbol = this.currentActiveSymbol?.symbol;
+        const refreshed = symbol ? this.symbolMap?.[symbol] : undefined;
+        if (refreshed && refreshed !== this.currentActiveSymbol) {
+            this.updateCurrentActiveSymbol(refreshed);
+        }
+    }
     setChartAvailability(status: boolean) {
         this.isChartAvailable = status;
     }
@@ -519,6 +534,11 @@ class ChartStore {
             }
         };
 
+        // The loader-hide must be a post-condition of this fetch *settling*, not only
+        // of its success callback: fetchInitialData can reject (not every getQuotes
+        // await inside it is guarded), which would leave the armed loaderTimeout to
+        // show "Retrieving Chart Data..." forever. Note a null feed needs no handling
+        // here — that only happens in destroy(), which clears loaderTimeout itself.
         this.feed?.fetchInitialData(
             symbolObj.symbol,
             {
@@ -535,7 +555,11 @@ class ChartStore {
                 this.mainStore.chart.feed?.onMasterDataUpdate(this.mainStore.chartAdapter.onTick);
                 onChartLoad(error as string);
             }
-        );
+        )?.catch((error: unknown) => {
+            if (requestId !== this._chartRequestId) return;
+            console.error('Failed to fetch initial chart data:', error);
+            onChartLoad('');
+        });
     }
 
     remainLabelY = (): number => 0;

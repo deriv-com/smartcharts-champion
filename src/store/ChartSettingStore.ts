@@ -49,12 +49,22 @@ export default class ChartSettingStore {
         this.mainStore = mainStore;
         this.menuStore = new MenuStore(mainStore, { route: 'setting' });
 
-        // below reaction is updating the symbols and those elements that are not updating automatically on language change.
+        // Language is a JS-side concern only: it changes translated strings (React
+        // re-renders on the `language` observable) and the symbol's localised
+        // display_name. The Flutter engine is locale-agnostic — its newChart payload
+        // carries no locale field and chart_app has no intl/DateFormat usage — so
+        // there is nothing in it to rebuild.
+        //
+        // This used to call changeSymbol(..., isLanguageChanged=true), which forgot
+        // the tick stream, refetched 1000 ticks and tore the chart down to re-apply
+        // an identical config. That was the second half of a two-step that no longer
+        // exists: it paired with activeSymbols.retrieveActiveSymbols(true), which
+        // re-fetched localised symbols and was removed when activeSymbols moved to
+        // the host. All that remains necessary is re-reading the symbol object.
         reaction(
             () => (this?.language as TLanguage)?.key,
             () => {
-                // activeSymbols was removed from chart, directly call changeSymbol with isLanguageChanged=true
-                mainStore?.chart?.changeSymbol?.(mainStore.state.symbol, mainStore.state.granularity, true);
+                mainStore?.chart?.refreshCurrentActiveSymbol?.();
             }
         );
         when(
@@ -172,32 +182,12 @@ export default class ChartSettingStore {
         }
         if (updatedLanguage !== this.mainStore.chart.currentLanguage) {
             this.mainStore.chart.currentLanguage = updatedLanguage;
-            
-            // Save the layout to ensure drawing tools are preserved
-            this.mainStore.state.saveLayout();
-            
-            // Force reload of drawing tools from Flutter side
-            // This triggers the _loadSavedDrawingTools method in drawing_tool.dart
-            setTimeout(() => {
-                // First get the current symbol
-                const symbol = this.mainStore.chart.currentActiveSymbol?.symbol;
-                if (symbol) {
-                    // Create a new chart payload to trigger the drawing tool reload
-                    window.flutterChart?.app.newChart({
-                        symbol,
-                        granularity: this.mainStore.chartAdapter.getGranularityInMs(),
-                        chartType: this.mainStore.state.chartType,
-                        isLive: this.mainStore.chart.isLive || false,
-                        startWithDataFitMode: this.mainStore.chartAdapter.isDataFitModeEnabled,
-                        theme: this.theme,
-                        msPerPx: this.mainStore.chartAdapter.msPerPx,
-                        pipSize: this.mainStore.chart.pip,
-                        isMobile: this.mainStore.chart.isMobile || false,
-                        isSmoothChartEnabled: this.isSmoothChartEnabled,
-                        yAxisMargin: this.mainStore.state.yAxisMargin,
-                    });
-                }
-            }, 100);
+            // Nothing else to do: the engine is not rebuilt on a language change, so
+            // its drawing tools are never wiped and need no save/reload cycle. The
+            // previous workaround here fired a bare `app.newChart` 100ms later to
+            // restore drawings the rebuild had destroyed — without the paired
+            // `feed.onTickHistory` the engine expects, so it reset the Dart feed
+            // model and left nothing to repopulate it.
         }
         this.saveSetting();
     }
