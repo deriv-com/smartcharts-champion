@@ -404,6 +404,10 @@ export const makeElementDraggable = (
     { onDragStart, onDrag, onDragReleased }: TDragEvents
 ) => {
     el.addEventListener('mousedown', dragMouseDown);
+    // Touch devices never emit `mousemove` while a finger is down, so the mouse handlers
+    // above are enough for desktop only. Without these, draggable barriers cannot be moved
+    // on mobile.
+    el.addEventListener('touchstart', dragTouchStart, { passive: true });
 
     let isDragging = false;
 
@@ -428,6 +432,52 @@ export const makeElementDraggable = (
 
         window.removeEventListener('mousemove', elementDrag);
         zone.removeEventListener('mouseup', closeDragElement);
+    }
+
+    function dragTouchStart(ev: TouchEvent) {
+        // A multi-touch gesture is a pinch-zoom on the chart, not a drag.
+        if (isDragging || ev.touches.length !== 1) {
+            return;
+        }
+
+        // Touch events keep firing on the element the gesture started on, so the whole
+        // gesture is tracked here rather than on `window`/`zone`.
+        el.addEventListener('touchmove', elementTouchDrag, { passive: false });
+        el.addEventListener('touchend', closeTouchDrag);
+        el.addEventListener('touchcancel', closeTouchDrag);
+
+        isDragging = true;
+
+        onDragStart?.(ev.touches[0]);
+    }
+
+    function elementTouchDrag(ev: TouchEvent) {
+        if (!isDragging) {
+            return;
+        }
+        if (ev.touches.length !== 1) {
+            closeTouchDrag(ev);
+            return;
+        }
+        // Keep the chart and the page from panning while the line follows the finger.
+        if (ev.cancelable) {
+            ev.preventDefault();
+        }
+
+        onDrag?.(ev.touches[0]);
+    }
+
+    function closeTouchDrag(ev: TouchEvent) {
+        if (!isDragging) {
+            return;
+        }
+        isDragging = false;
+
+        onDragReleased?.(ev.changedTouches[0] ?? ev.touches[0]);
+
+        el.removeEventListener('touchmove', elementTouchDrag);
+        el.removeEventListener('touchend', closeTouchDrag);
+        el.removeEventListener('touchcancel', closeTouchDrag);
     }
 };
 

@@ -1,6 +1,7 @@
 import EventEmitter from 'event-emitter-es6';
 import { action, computed, observable, when, makeObservable, reaction, IReactionDisposer } from 'mobx';
 import Context from 'src/components/ui/Context';
+import { TDragPoint } from 'src/types';
 import MainStore from '.';
 import { ARROW_HEIGHT, DIRECTIONS, makeElementDraggable } from '../utils';
 
@@ -112,7 +113,7 @@ export default class PriceLineStore {
     }
 
     init = () => {
-        const exitIfNotisDraggable = (e: MouseEvent, callback: (event: MouseEvent) => void) => {
+        const exitIfNotisDraggable = (e: TDragPoint, callback: (event: TDragPoint) => void) => {
             if (this.visible && this.draggable) {
                 callback.call(this, e);
             }
@@ -122,9 +123,9 @@ export default class PriceLineStore {
 
         if (this._line && subholder) {
             makeElementDraggable(this._line, subholder, {
-                onDragStart: (e: MouseEvent) => exitIfNotisDraggable(e, this._startDrag),
-                onDrag: (e: MouseEvent) => exitIfNotisDraggable(e, e => this._dragLine(e, subholder)),
-                onDragReleased: (e: MouseEvent) => exitIfNotisDraggable(e, this._endDrag),
+                onDragStart: (e: TDragPoint) => exitIfNotisDraggable(e, this._startDrag),
+                onDrag: (e: TDragPoint) => exitIfNotisDraggable(e, e => this._dragLine(e, subholder)),
+                onDragReleased: (e: TDragPoint) => exitIfNotisDraggable(e, this._endDrag),
             });
         }
     };
@@ -228,7 +229,7 @@ export default class PriceLineStore {
         this._startDragPrice = this._price;
     };
 
-    _dragLine = (e: MouseEvent, zone: HTMLElement) => {
+    _dragLine = (e: TDragPoint, zone: HTMLElement) => {
         if (!this._line) {
             return;
         }
