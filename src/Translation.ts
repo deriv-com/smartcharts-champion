@@ -13,15 +13,22 @@ export class Translation {
             this.lang = lang;
             callback?.();
         } else {
-            import(/* webpackChunkName: "[request]" */ `../translation/${lang}.json`).then(imported_lang => {
-                if (imported_lang) {
-                    lang_map[lang] = imported_lang.default;
-                    this.lang = lang;
-                    callback?.();
-                } else {
-                    console.error('Unsupported language:', lang);
-                }
-            });
+            import(/* webpackChunkName: "[request]" */ `../translation/${lang}.json`)
+                .then(imported_lang => {
+                    if (imported_lang) {
+                        lang_map[lang] = imported_lang.default;
+                        this.lang = lang;
+                    } else {
+                        console.error('Unsupported language:', lang);
+                    }
+                })
+                .catch(error => {
+                    console.error('Failed to load language:', lang, error);
+                })
+                // The callback is the caller's "locale settled" signal (it drives the
+                // loader). It must run on failure too, otherwise a chunk that 404s or
+                // an unsupported locale strands the caller waiting forever.
+                .then(() => callback?.());
         }
     }
 

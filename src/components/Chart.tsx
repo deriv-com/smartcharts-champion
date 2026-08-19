@@ -5,7 +5,6 @@ import 'react-tabs/style/react-tabs.css';
 import { useStores } from 'src/store';
 import { TChartProps } from 'src/types';
 import { safeParse } from 'src/utils';
-import { usePrevious } from '../hooks';
 
 /* css + scss */
 import '../../sass/main.scss';
@@ -39,7 +38,7 @@ const Chart = React.forwardRef<
     const { settingsDialog: chartTypeSettingsDialog, isCandle, isSpline } = chartType;
     const { updateProps, isChartClosed } = state;
     const { theme, position, isHighestLowestMarkerEnabled } = chartSetting;
-    const { isActive: isLoading, show: showChart } = loader;
+    const { isActive: isLoading } = loader;
 
     const rootRef = React.useRef<HTMLDivElement>(null);
     const chartContainerRef = React.useRef<HTMLDivElement>(null);
@@ -87,13 +86,15 @@ const Chart = React.forwardRef<
         updateProps(props);
     });
 
-    const prevLang = usePrevious(t.lang);
-    React.useEffect(() => {
-        if (prevLang && prevLang !== t.lang && !isLoading) {
-            showChart?.();
-        }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [t.lang]);
+    // NOTE: do not show the loader from a `t.lang` effect here. `t.lang` only
+    // flips *inside* the translation-loaded callback that hides the loader, so a
+    // show driven off it always lands after that hide and can never be balanced —
+    // it wedges "Retrieving Chart Data..." on for good.
+    // A language switch also has no loader to wait on: ChartSettingStore's language
+    // reaction only calls ChartStore.refreshCurrentActiveSymbol() to re-localise the
+    // title, which never re-inits the chart. The loader is only ever shown by mount
+    // (ChartStore.init), a symbol/granularity reload (ChartStore.newChart) and a
+    // template restore (ViewStore.restoreLayout) — none of which a locale change hits.
 
     const defaultTopWidgets = () => <ChartTitle />;
 
