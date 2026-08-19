@@ -89,9 +89,12 @@ const Chart = React.forwardRef<
     // NOTE: do not show the loader from a `t.lang` effect here. `t.lang` only
     // flips *inside* the translation-loaded callback that hides the loader, so a
     // show driven off it always lands after that hide and can never be balanced —
-    // it wedges "Retrieving Chart Data..." on for good. The language-change reload
-    // (ChartSettingStore reaction -> changeSymbol -> ChartStore.newChart) already
-    // owns the loader: it arms the 2.5s loaderTimeout and hides on completion.
+    // it wedges "Retrieving Chart Data..." on for good.
+    // A language switch also has no loader to wait on: ChartSettingStore's language
+    // reaction only calls ChartStore.refreshCurrentActiveSymbol() to re-localise the
+    // title, which never re-inits the chart. The loader is only ever shown by mount
+    // (ChartStore.init), a symbol/granularity reload (ChartStore.newChart) and a
+    // template restore (ViewStore.restoreLayout) — none of which a locale change hits.
 
     const defaultTopWidgets = () => <ChartTitle />;
 
