@@ -510,10 +510,13 @@ export type TLoadHistoryParams = {
     end: number;
 };
 
+/** Common shape of a `MouseEvent` and a `Touch`, so dragging works with either input. */
+export type TDragPoint = Pick<MouseEvent, 'pageX' | 'pageY'>;
+
 export type TDragEvents = {
-    onDragStart?: (ev: MouseEvent) => void;
-    onDrag?: (ev: MouseEvent) => void;
-    onDragReleased?: (ev: MouseEvent) => void;
+    onDragStart?: (ev: TDragPoint) => void;
+    onDrag?: (ev: TDragPoint) => void;
+    onDragReleased?: (ev: TDragPoint) => void;
 };
 
 export type TLayout = {
