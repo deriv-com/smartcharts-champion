@@ -29,8 +29,13 @@
             z-index: 105;
         }
         &.draggable > .draggable-area {
-            &:hover {
-                background: rgba(0, 0, 0, 0.05);
+            // Touch devices emulate `:hover` on tap and keep it applied for the whole
+            // gesture, which paints this highlight over the line while it is being dragged.
+            // Restrict it to pointers that can genuinely hover.
+            @media (hover: hover) {
+                &:hover {
+                    background: rgba(0, 0, 0, 0.05);
+                }
             }
             height: 20px;
             top: -8px;
