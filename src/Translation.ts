@@ -1,3 +1,5 @@
+import { action, makeObservable, observable, runInAction } from 'mobx';
+
 const lang_map: {
     [key: string]: Record<string, string>;
 } = {};
@@ -6,6 +8,17 @@ export class Translation {
     lang: string;
     constructor(lang = 'en') {
         this.lang = lang;
+        // `lang` must be observable: `translate()` reads it, so making it observable
+        // is what subscribes every `observer` component that renders a translated
+        // string to a language switch. Without it nothing re-renders on its own and
+        // strings only refresh when React happens to re-render for another reason —
+        // which never happens for a prop-less `observer` (mobx-react-lite wraps those
+        // in React.memo, so a parent re-render can't reach them). That left e.g. the
+        // CrosshairToggle tooltip showing the previous language until it was clicked.
+        makeObservable(this, {
+            lang: observable,
+            setLanguage: action,
+        });
     }
 
     setLanguage(lang: string, callback: () => void) {
@@ -17,7 +30,11 @@ export class Translation {
                 .then(imported_lang => {
                     if (imported_lang) {
                         lang_map[lang] = imported_lang.default;
-                        this.lang = lang;
+                        // The `action` on setLanguage does not cover this callback: it
+                        // runs in a later microtask, outside that action's scope.
+                        runInAction(() => {
+                            this.lang = lang;
+                        });
                     } else {
                         console.error('Unsupported language:', lang);
                     }
