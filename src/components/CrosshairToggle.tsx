@@ -6,14 +6,23 @@ import Tooltip from './Tooltip';
 
 const CrosshairToggle = () => {
     const { chart, crosshair } = useStores();
-    const { isMobile } = chart;
+    const { isMobile, chartId } = chart;
 
     const CrosshairIcon = crosshair.isEnabled ? ChartCrosshairEnabledIcon : ChartCrosshairDisabledIcon;
 
     const crosshairLabel = crosshair.isEnabled ? t.translate('Disable Crosshair') : t.translate('Enable Crosshair');
 
+    // The contract details (replay) chart sits lower in the viewport, so its tooltip stays above
+    // the button. Everywhere else — the trade page included — it drops below.
+    const tooltipPosition = chartId === 'replay' ? 'top' : 'bottom';
+
     return (
-        <Tooltip content={crosshairLabel} enabled={!isMobile} position='top' className='sc-crosshair-toggle'>
+        <Tooltip
+            content={crosshairLabel}
+            enabled={!isMobile}
+            position={tooltipPosition}
+            className='sc-crosshair-toggle'
+        >
             <button
                 type='button'
                 className='sc-navigation-widget__item'

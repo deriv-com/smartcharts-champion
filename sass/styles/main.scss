@@ -207,6 +207,22 @@
             }
         }
     }
+    &--bottom {
+        .sc-tooltip__inner {
+            top: 100%;
+            transform: translateX(-50%) translateY(8px);
+
+            &:before {
+                bottom: auto;
+                top: 0px;
+                border-top: none !important;
+                transform: translateY(-100%);
+                @include themify($themes) {
+                    border-bottom: 6px solid themed('TooltipBg');
+                }
+            }
+        }
+    }
     &--enable {
         &:hover {
             .sc-tooltip__inner {
