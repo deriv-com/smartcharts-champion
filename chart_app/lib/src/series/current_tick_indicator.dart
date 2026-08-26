@@ -1,3 +1,4 @@
+import 'package:chart_app/src/painters/current_tick_indicator_painter.dart';
 import 'package:deriv_chart/core_chart.dart';
 
 /// CurrentTickIndicator
@@ -17,4 +18,7 @@ class CurrentTickIndicator extends TickIndicator {
 
   @override
   bool shouldRepaint(ChartData? previous) => true;
+
+  @override
+  SeriesPainter<Series> createPainter() => CurrentTickIndicatorPainter(this);
 }
