@@ -22,14 +22,24 @@ class CustomLinePainter extends LinePainter {
     // Compute the lerped quote value exactly as Flutter does for the line
     // animation. This ensures JS barriers use the exact same interpolated
     // value.
+    //
+    // This intentionally does NOT check whether the newest tick is inside
+    // `series.visibleEntries`. That check belongs to the line geometry (the
+    // line is only drawn up to the last *visible* tick), but a barrier's
+    // price is anchored to the newest quote regardless of scroll position.
+    // Gating on visibility made `lerpedQuote` null whenever the chart was
+    // scrolled away from the current tick, which forced JS barriers onto the
+    // non-animated fallback path and made them snap between price levels.
     double? lerpedQuote;
-    if (series.entries != null && series.entries!.isNotEmpty) {
-      final Tick lastTick = series.entries!.last;
-      final Tick lastVisibleTick = series.visibleEntries.last;
+    final List<Tick>? entries = series.entries;
 
-      if (lastTick == lastVisibleTick && series.prevLastEntry != null) {
+    if (entries != null && entries.isNotEmpty && series.prevLastEntry != null) {
+      final Tick lastTick = entries.last;
+      final Tick prevLastTick = series.prevLastEntry!.entry;
+
+      if (!lastTick.quote.isNaN && !prevLastTick.quote.isNaN) {
         lerpedQuote = ui.lerpDouble(
-          series.prevLastEntry!.entry.quote,
+          prevLastTick.quote,
           lastTick.quote,
           animationInfo.currentTickPercent,
         );
