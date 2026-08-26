@@ -47,14 +47,32 @@ class CurrentTickIndicatorPainter
     // can be scrolled out of the epoch range while price lines are still on
     // screen and still need to track it.
     final BarrierObject? previousBarrier = series.previousObject;
+    final double? currentQuote = series.quote;
 
-    final double? animatedQuote = previousBarrier == null
-        ? series.quote
-        : ui.lerpDouble(
-            previousBarrier.quote,
-            series.quote,
-            animationInfo.currentTickPercent,
-          );
+    // Neither operand may reach `ui.lerpDouble` unvalidated. It only
+    // short-circuits when *both* are NaN; a single NaN operand trips its
+    // `assert(a.isFinite)` in debug builds and yields NaN in release. A null
+    // operand is worse still — it is coerced to `0.0`, which would animate the
+    // price line towards zero rather than towards the spot.
+    //
+    // Emitting `null` instead is the documented "no animated value" contract:
+    // `PriceLineStore.drawBarrier` falls back to the current close. The two bad
+    // inputs degrade differently, though — a bad *previous* quote only means
+    // there is no valid origin to interpolate from, so the current quote is
+    // still reported and the price line lands on it without a transition.
+    double? animatedQuote;
+
+    if (currentQuote != null && !currentQuote.isNaN) {
+      final double? previousQuote = previousBarrier?.quote;
+
+      animatedQuote = previousQuote == null || previousQuote.isNaN
+          ? currentQuote
+          : ui.lerpDouble(
+              previousQuote,
+              currentQuote,
+              animationInfo.currentTickPercent,
+            );
+    }
 
     JsInterop.onMainSeriesPaint(
       animationInfo.currentTickPercent,
