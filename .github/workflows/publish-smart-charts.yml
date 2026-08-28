@@ -36,7 +36,7 @@ jobs:
                   flutter build web --wasm --release
 
             - name: Setup node
-              uses: actions/setup-node@b39b52d1213e96004bfcb1c61a8a6fa8ab84f3e8
+              uses: actions/setup-node@efcb663fc60e97218a2b2d6d827f7830f164739e
               with:
                   node-version: 22.x
 
