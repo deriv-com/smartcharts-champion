@@ -33,7 +33,7 @@ const Chart = React.forwardRef<
     const { chart, drawTools, studies, chartSetting, chartType, state, loader, chartAdapter, timeperiod, crosshair } =
         useStores();
     const { chartId, init, destroy, isChartAvailable, chartContainerHeight, containerWidth } = chart;
-    const { settingsDialog: studiesSettingsDialog, restoreStudies, activeItems } = studies;
+    const { restoreStudies, activeItems } = studies;
     const { settingsDialog: drawToolsSettingsDialog } = drawTools;
     const { settingsDialog: chartTypeSettingsDialog, isCandle, isSpline } = chartType;
     const { updateProps, isChartClosed } = state;
@@ -208,7 +208,6 @@ const Chart = React.forwardRef<
                 </div>
                 <SettingsDialog store={drawToolsSettingsDialog} />
                 <SettingsDialog store={chartTypeSettingsDialog} />
-                <SettingsDialog store={studiesSettingsDialog} />
                 <IndicatorPredictionDialog />
                 <DrawingConfirmationToast />
                 <DeletionSnackbar />

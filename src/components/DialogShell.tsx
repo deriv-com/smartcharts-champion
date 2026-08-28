@@ -49,6 +49,11 @@ type TDialogShellProps = {
     onClose: () => void;
     /** Rendered as the sheet header on mobile. Desktop titles are drawn by each dialog's body. */
     mobileTitle?: string;
+    /**
+     * Quill's corner close button. Turn it off when the design places the dismiss control
+     * inside the dialog's own header instead.
+     */
+    showCloseButton?: boolean;
     className?: string;
     children?: React.ReactNode;
 };
@@ -74,7 +79,14 @@ const DialogSurface = ({ children }: { children?: React.ReactNode }) => (
     </div>
 );
 
-const DialogShell = ({ open, onClose, mobileTitle, className, children }: TDialogShellProps) => {
+const DialogShell = ({
+    open,
+    onClose,
+    mobileTitle,
+    showCloseButton = true,
+    className,
+    children,
+}: TDialogShellProps) => {
     const { chart, chartSetting } = useStores();
     const { isMobile } = chart;
     const portalNode = useQuillPortal(chartSetting.theme, isMobile);
@@ -102,7 +114,7 @@ const DialogShell = ({ open, onClose, mobileTitle, className, children }: TDialo
         <Modal
             isOpened={open}
             toggleModal={onClose}
-            showCrossIcon
+            showCrossIcon={showCloseButton}
             hasFooter={false}
             portalId={PORTAL_ID}
             className={classNames('sc-quill-dialog', className)}
