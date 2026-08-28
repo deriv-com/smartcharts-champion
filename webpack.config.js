@@ -245,6 +245,20 @@ const config = {
             commonjs: 'mobx-react-lite',
             commonjs2: 'mobx-react-lite',
         },
+        // Quill design system is a peerDependency: the host app already ships these
+        // (derivatives-trader pins quill-ui 1.24.9 / quill-icons 2.4.16). Externalising
+        // keeps the bundle lean and — critically — avoids a second copy of quill-ui,
+        // which would create a duplicate React context for its portals and providers.
+        '@deriv-com/quill-ui': {
+            root: 'QuillUI',
+            commonjs: '@deriv-com/quill-ui',
+            commonjs2: '@deriv-com/quill-ui',
+        },
+        '@deriv/quill-icons': {
+            root: 'QuillIcons',
+            commonjs: '@deriv/quill-icons',
+            commonjs2: '@deriv/quill-icons',
+        },
     },
 };
 
@@ -347,6 +361,11 @@ if (isApp) {
     // This lets webpack bundle it with its use-sync-external-store dependency
     // avoiding the UMD shim compatibility issue with React 18
     delete config.externals['mobx-react-lite'];
+
+    // Quill ships no UMD build, so the sample app has no global to bind to.
+    // Bundle it instead — the library build keeps it external.
+    delete config.externals['@deriv-com/quill-ui'];
+    delete config.externals['@deriv/quill-icons'];
 
     config.plugins.push(
         new CopyWebpackPlugin({

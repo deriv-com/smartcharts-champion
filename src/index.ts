@@ -1,11 +1,9 @@
 import Barrier from './components/Barrier';
 import PendingPromise from './utils/PendingPromise';
-import ChartTypes from './components/ChartTypes';
 import ChartMode from './components/ChartMode';
 import StudyLegend from './components/StudyLegend';
 import Views from './components/Views';
 import CrosshairToggle from './components/CrosshairToggle';
-import Timeperiod from './components/Timeperiod';
 import ChartSize from './components/ChartSize';
 import DrawTools from './components/DrawTools';
 import ChartSetting from './components/ChartSetting';
@@ -29,7 +27,6 @@ export {
     ChartSetting,
     ChartSize,
     ChartTitle,
-    ChartTypes,
     ChartMode,
     createObjectFromLocalStorage,
     CrosshairToggle,
@@ -40,7 +37,6 @@ export {
     Share,
     SmartChart,
     StudyLegend,
-    Timeperiod,
     Views,
     ToolbarWidget,
     logEvent,
@@ -53,7 +49,6 @@ export default {
     ChartSetting,
     ChartSize,
     ChartTitle,
-    ChartTypes,
     ChartMode,
     createObjectFromLocalStorage,
     CrosshairToggle,
@@ -65,7 +60,6 @@ export default {
     Share,
     SmartChart,
     StudyLegend,
-    Timeperiod,
     Views,
     ToolbarWidget,
     logEvent,

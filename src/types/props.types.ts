@@ -156,7 +156,12 @@ export type TBar = {
     cName: string;
 };
 
-export type ChartType = ArrayElement<typeof ChartTypes> & { active?: boolean; disabled?: boolean };
+export type ChartType = ArrayElement<typeof ChartTypes> & {
+    active?: boolean;
+    disabled?: boolean;
+    /** Why the option is disabled, surfaced as a tooltip in the chart type dialog. */
+    disabledReason?: string;
+};
 
 export type TLanguage = {
     key: string;
@@ -271,6 +276,24 @@ export type TChartProps = {
     shouldFetchTradingTimes?: boolean;
     shouldGetQuotes?: boolean;
     allowTickChartTypeOnly?: boolean;
+    /**
+     * Restricts the chart-type picker to this set of chart type ids (e.g. `['line']`).
+     * Anything outside the list renders disabled with `restrictionMessage` as its tooltip.
+     * Omit (or pass an empty array) for no restriction.
+     */
+    allowedChartTypes?: string[];
+    /**
+     * Restricts the time-interval picker to this set of granularities (e.g. `[0]` for 1 tick).
+     * Anything outside the list renders disabled with `restrictionMessage` as its tooltip.
+     * Omit (or pass an empty array) for no restriction.
+     */
+    allowedGranularities?: TGranularity[];
+    /**
+     * Tooltip shown on options disabled by `allowedChartTypes` / `allowedGranularities`.
+     * Host-supplied so the copy can name the trade type, e.g.
+     * `Only "Area" chart and "1 tick" interval are available for Accumulator.`
+     */
+    restrictionMessage?: string;
     allTicks?: NonNullable<AuditDetailsForExpiredContract>['all_ticks'];
     contractInfo?: ProposalOpenContract;
     maxTick?: number | null;

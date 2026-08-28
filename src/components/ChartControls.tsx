@@ -3,10 +3,9 @@ import classNames from 'classnames';
 import { observer } from 'mobx-react-lite';
 import { TChartControlsWidgets } from 'src/types';
 import { useStores } from 'src/store';
-import ChartTypes from './ChartTypes';
+import ChartMode from './ChartMode';
 import StudyLegend from './StudyLegend';
 import CrosshairToggle from './CrosshairToggle';
-import Timeperiod from './Timeperiod';
 import ChartSize from './ChartSize';
 import DrawTools from './DrawTools';
 import '../../sass/components/_chart-controls.scss';
@@ -19,8 +18,8 @@ type TRenderDefaultControls = { isMobile?: boolean };
 export const RenderDefaultControls = ({ isMobile }: TRenderDefaultControls) => (
     <>
         {isMobile ? '' : <CrosshairToggle />}
-        <ChartTypes />
-        <Timeperiod />
+        {/* Chart type and time interval now share one dialog. */}
+        <ChartMode />
         <StudyLegend />
         <DrawTools />
         <Suspense fallback={null}>
@@ -35,10 +34,10 @@ type TChartControlsProps = {
 };
 
 const ChartControls = ({ widgets }: TChartControlsProps) => {
-    const { chart, chartType, studies, drawTools, view, share, chartSetting } = useStores();
+    const { chart, chartMode, studies, drawTools, view, share, chartSetting } = useStores();
     const { context, isMobile } = chart;
     const hasOpenMenu =
-        chartType.menuStore.open ||
+        chartMode.menuStore.open ||
         studies.menuStore.open ||
         drawTools.menuStore.open ||
         view.menuStore.open ||

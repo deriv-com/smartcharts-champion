@@ -68,13 +68,14 @@ export const getDrawTools: () => TDrawTools = () => ({
     // channel: { id: 'channel', text: t.translate('Channel [num]'), icon: DrawToolsChannelIcon },
     // continuous: { id: 'continuous', text: t.translate('Continuous [num]'), icon: DrawToolsContinuousIcon },
     // fibfan: { id: 'fibfan', text: t.translate('Fib Fan [num]'), icon: FibfanDrawingToolConfig },
+    // Order matches the "All drawings" list in the design.
     horizontal: { id: 'horizontal', text: t.translate('Horizontal line [num]'), icon: DrawToolsHorizontalIcon },
+    vertical: { id: 'vertical', text: t.translate('Vertical line [num]'), icon: DrawToolsVerticalIcon },
     line: { id: 'line', text: t.translate('Trend line [num]'), icon: DrawToolsLineIcon },
     // ray: { id: 'ray', text: t.translate('Ray [num]'), icon: DrawToolsRayIcon },
     // continuous: { id: 'continuous', text: t.translate('Continuous [num]'), icon: DrawToolsRayIcon },
     // rectangle: { id: 'rectangle', text: t.translate('Rectangle [num]'), icon: DrawToolsRectangleIcon },
     // trend: { id: 'trend', text: t.translate('Trend [num]'), icon: DrawToolsTrendIcon },
-    vertical: { id: 'vertical', text: t.translate('Vertical line [num]'), icon: DrawToolsVerticalIcon },
 });
 
 export const getTooltipLabels = (key: string, activeItem?: TActiveItem) => {
