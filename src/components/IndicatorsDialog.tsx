@@ -1,5 +1,5 @@
 /* eslint-disable react/no-array-index-key */
-import { SearchField } from '@deriv-com/quill-ui';
+import { SearchField, Tooltip } from '@deriv-com/quill-ui';
 import {
     StandaloneChevronLeftRegularIcon,
     StandaloneChevronRightRegularIcon,
@@ -170,11 +170,9 @@ const IndicatorsDialogBody = observer(({ searchInputClassName }: { searchInputCl
             {list.map(indicator => {
                 const blocked = blockedReason(indicator);
                 const Icon = indicator.icon;
-                return (
+                const row = (
                     <button
                         type='button'
-                        key={indicator.flutter_chart_id}
-                        title={blocked}
                         aria-disabled={!!blocked}
                         className={classNames('sc-indicators-dialog__row', {
                             'sc-indicators-dialog__row--disabled': !!blocked,
@@ -188,6 +186,25 @@ const IndicatorsDialogBody = observer(({ searchInputClassName }: { searchInputCl
                             className='sc-indicators-dialog__row__chevron'
                         />
                     </button>
+                );
+
+                // Only unavailable rows explain themselves, and they do it through quill rather
+                // than the browser's own `title` bubble, which ignores the design entirely.
+                return blocked ? (
+                    <Tooltip
+                        key={indicator.flutter_chart_id}
+                        as='div'
+                        className='sc-indicators-dialog__row-tip'
+                        // The marker class is what the stylesheet keys off to move the arrow;
+                        // it keeps that override off every other quill tooltip on the page.
+                        tooltipContent={<span className='sc-indicators-dialog__tip'>{blocked}</span>}
+                        tooltipPosition='top'
+                        popoverAlign='start'
+                    >
+                        {row}
+                    </Tooltip>
+                ) : (
+                    <React.Fragment key={indicator.flutter_chart_id}>{row}</React.Fragment>
                 );
             })}
         </div>

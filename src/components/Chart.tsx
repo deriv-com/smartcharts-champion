@@ -49,7 +49,6 @@ const Chart = React.forwardRef<
                 return localStorage.getItem('predictionIndicators') !== null;
             },
             triggerPopup(cancelCallback: () => void) {
-                timeperiod.predictionIndicator.dialogPortalNodeId = 'modal_root';
                 timeperiod.predictionIndicator.setOpen(true);
                 timeperiod.predictionIndicator.setCancel(() => {
                     if (localStorage.getItem('predictionIndicators')) {

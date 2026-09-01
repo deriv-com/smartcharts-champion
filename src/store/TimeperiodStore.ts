@@ -235,7 +235,6 @@ export default class TimeperiodStore {
             });
         }
         if (interval === 0 && this.mainStore.studies.hasPredictionIndicator) {
-            this.predictionIndicator.dialogPortalNodeId = this.portalNodeIdChanged;
             this.predictionIndicator.setOpen(true);
         } else {
             this.onGranularityChange(interval);

@@ -3,15 +3,12 @@ import MainStore from '.';
 import MenuStore from './MenuStore';
 
 export default class IndicatorPredictionDialogStore {
-    dialogPortalNodeId?: string;
     mainStore: MainStore;
     menuStore: MenuStore;
-    scrollPanel?: HTMLElement;
     cancelCallback?: (() => void) | null;
 
     constructor({ mainStore }: { mainStore: MainStore }) {
         makeObservable(this, {
-            dialogPortalNodeId: observable,
             open: computed,
             cancelCallback: observable,
             setOpen: action.bound,
@@ -29,9 +26,6 @@ export default class IndicatorPredictionDialogStore {
     }
 
     setOpen(value: boolean) {
-        if (value && this.scrollPanel) {
-            this.scrollPanel.scrollTop = 0;
-        }
         return this.menuStore.setOpen(value);
     }
 
