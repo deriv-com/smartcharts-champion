@@ -5,7 +5,21 @@ import React from 'react';
 import { useStores } from 'src/store';
 import '../../sass/components/_quill-dialogs.scss';
 
-const PORTAL_ID = 'smartcharts-quill-portal';
+/**
+ * The portal container belongs to one chart, not to the page.
+ *
+ * A single shared node would be written by every mounted `SmartChart`, and the last effect
+ * to run would decide the theme and device classes for all of them - so on a page with two
+ * charts in different themes, one chart's dialogs would silently render in the other's
+ * theme. Keying on `chartId` keeps them apart.
+ *
+ * Styling hooks off the `.smartcharts-quill-portal` class rather than this id, so the id
+ * varying per instance costs nothing.
+ */
+export const quillPortalId = (chartId?: string) =>
+    // `ChartStore` types `chartId` as optional but always assigns it (`props.id || 'base-chart'`);
+    // the fallback just keeps the id well-formed if this is ever called before that runs.
+    `smartcharts-quill-portal-${chartId ?? 'base-chart'}`;
 
 /**
  * Quill portals to `document.getElementById(portalId)`, so the dialog lands outside the
@@ -17,18 +31,18 @@ const PORTAL_ID = 'smartcharts-quill-portal';
  * overrides them for the whole subtree. That keeps the dialog matching `settings.theme` even
  * if the host app's `<html>` class disagrees (see _quill-dialogs.scss).
  */
-const useQuillPortal = (theme: string, isMobile?: boolean) => {
+const useQuillPortal = (portalId: string, theme: string, isMobile?: boolean) => {
     const [node, setNode] = React.useState<HTMLElement | null>(null);
 
     React.useEffect(() => {
-        let el = document.getElementById(PORTAL_ID);
+        let el = document.getElementById(portalId);
         if (!el) {
             el = document.createElement('div');
-            el.id = PORTAL_ID;
+            el.id = portalId;
             document.body.appendChild(el);
         }
         setNode(el);
-    }, []);
+    }, [portalId]);
 
     React.useEffect(() => {
         if (!node) return;
@@ -88,8 +102,9 @@ const DialogShell = ({
     children,
 }: TDialogShellProps) => {
     const { chart, chartSetting } = useStores();
-    const { isMobile } = chart;
-    const portalNode = useQuillPortal(chartSetting.theme, isMobile);
+    const { isMobile, chartId } = chart;
+    const portalId = quillPortalId(chartId);
+    const portalNode = useQuillPortal(portalId, chartSetting.theme, isMobile);
 
     // Nothing to portal into yet (first paint) — render nothing rather than let quill
     // fall back to `#modal-root` / `document.body`, which would skip our theme scope.
@@ -98,7 +113,7 @@ const DialogShell = ({
     if (isMobile) {
         return (
             <ActionSheet.Root isOpen={open} onClose={onClose} expandable={false} position='left'>
-                <ActionSheet.Portal showHandlebar shouldCloseOnDrag portalId={PORTAL_ID}>
+                <ActionSheet.Portal showHandlebar shouldCloseOnDrag portalId={portalId}>
                     <DialogSurface>
                         {mobileTitle && <ActionSheet.Header title={mobileTitle} />}
                         <ActionSheet.Content className={classNames('sc-quill-dialog', className)}>
@@ -116,7 +131,7 @@ const DialogShell = ({
             toggleModal={onClose}
             showCrossIcon={showCloseButton}
             hasFooter={false}
-            portalId={PORTAL_ID}
+            portalId={portalId}
             className={classNames('sc-quill-dialog', className)}
         >
             <DialogSurface>{children}</DialogSurface>

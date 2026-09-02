@@ -43,7 +43,13 @@ const numberBounds = (parameter: TNumberParameter) => ({
     step: parameter.step ?? 1,
 });
 
-const PORTAL_ID = 'smartcharts-quill-portal';
+/**
+ * The portal this bubble belongs to, found from the anchor rather than by id: the anchor is
+ * already inside its own chart's portal, so this stays correct on a page with several charts
+ * without threading an id down. Falls back to the body if the anchor is somehow detached.
+ */
+const portalFor = (anchor: React.RefObject<HTMLElement>) =>
+    anchor.current?.closest('.smartcharts-quill-portal') ?? document.body;
 /** Breathing room kept between a popover and the dialog's edges. */
 const EDGE = 8;
 /** Gap between the trigger and its popover. */
@@ -139,7 +145,7 @@ const Popover = ({ anchor, open, onClose, className, matchAnchorWidth, children 
 
     if (!open) return null;
 
-    const host = document.getElementById(PORTAL_ID) ?? document.body;
+    const host = portalFor(anchor);
 
     return ReactDOM.createPortal(
         <div

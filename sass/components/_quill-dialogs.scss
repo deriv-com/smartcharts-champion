@@ -44,6 +44,19 @@
 
 /* Shared -------------------------------------------------------------------- */
 
+/* Off-screen but still in the accessibility tree and the reading order. Used for the
+   disabled-option reasons, whose visible affordances (hover, tap) are pointer-only. */
+.sc-visually-hidden {
+    block-size: 1px;
+    /* The legacy `clip` rect rather than `clip-path`: universally supported, and the
+       repo's stylelint browser-features rule rejects `clip-path`. */
+    clip: rect(0 0 0 0);
+    inline-size: 1px;
+    overflow: hidden;
+    position: absolute;
+    white-space: nowrap;
+}
+
 .sc-quill-dialog {
     &__heading {
         color: var(--component-textIcon-normal-default);
@@ -162,6 +175,17 @@
             inset-inline-start: var(--sc-tooltip-arrow-left, 50%);
             position: absolute;
             transform: translateX(-50%);
+        }
+
+        /* Not enough headroom above the cell, so the bubble sits below it instead and the
+           arrow moves to the top edge to keep pointing back at what it describes. */
+        &.sc-chart-type-dialog__tap-tooltip--below:after {
+            border-block-end-color: var(--component-textIcon-normal-prominent);
+            border-block-end-width: 4px;
+            border-block-start-color: transparent;
+            border-block-start-width: 0;
+            inset-block-start: auto;
+            inset-block-end: 100%;
         }
     }
     &__tile {

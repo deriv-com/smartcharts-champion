@@ -1008,8 +1008,10 @@ const getSMIIndicatorConfig: TDefaultIndicatorConfigFn = () => ({
         pipSize: 2,
         showLastIndicator: true,
         smiOscillatorLimits: {
-            overboughtStyle: { ...clone(lineStyle), color: '#626b73' },
-            oversoldStyle: { ...clone(lineStyle), color: '#626b73' },
+            // Overwritten by the OverBought/OverSold parameters below; kept in step with
+            // their defaults so the two never disagree about the palette.
+            overboughtStyle: { ...clone(lineStyle), color: '#787d88' },
+            oversoldStyle: { ...clone(lineStyle), color: '#787d88' },
         },
     },
     parameters: [

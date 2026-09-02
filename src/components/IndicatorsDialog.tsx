@@ -1,4 +1,3 @@
-/* eslint-disable react/no-array-index-key */
 import { SearchField, Tooltip } from '@deriv-com/quill-ui';
 import {
     StandaloneChevronLeftRegularIcon,

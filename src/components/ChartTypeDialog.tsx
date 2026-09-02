@@ -22,7 +22,13 @@ const chunk = <T,>(items: T[], size: number): T[][] =>
         return rows;
     }, []);
 
-const PORTAL_ID = 'smartcharts-quill-portal';
+/**
+ * The portal this bubble belongs to, found from the anchor rather than by id: the anchor is
+ * already inside its own chart's portal, so this stays correct on a page with several charts
+ * without threading an id down. Falls back to the body if the anchor is somehow detached.
+ */
+const portalFor = (anchor: React.RefObject<HTMLElement>) =>
+    anchor.current?.closest('.smartcharts-quill-portal') ?? document.body;
 /** Breathing room kept between the bubble and the viewport edges. */
 const EDGE = 8;
 /** Gap between the cell and the bubble pointing at it. */
@@ -48,6 +54,8 @@ const TapTooltip = ({
     onDismiss: () => void;
 }) => {
     const ref = React.useRef<HTMLDivElement>(null);
+    // Which side the bubble ended up on, so the arrow can point back at the cell.
+    const [flipped, setFlipped] = React.useState(false);
     const [style, setStyle] = React.useState<React.CSSProperties>({
         left: 0,
         position: 'fixed',
@@ -71,12 +79,22 @@ const TapTooltip = ({
             // would point at the wrong tile. Kept clear of the rounded corners.
             const arrow = Math.max(ARROW * 2, Math.min(cellCentre - left, bubble.width - ARROW * 2));
 
+            // Above the cell by preference, below it when there isn't room - the sheet
+            // scrolls, and a short viewport (or a scrolled sheet) can leave a top row with
+            // less headroom than the bubble needs. Clamped either way so it stays on screen.
+            const above = cell.top - GAP - bubble.height;
+            const flip = above < EDGE;
+            const top = flip
+                ? Math.min(cell.bottom + GAP, window.innerHeight - EDGE - bubble.height)
+                : above;
+
             setStyle({
                 left: Math.round(left),
                 position: 'fixed',
-                top: Math.round(cell.top - GAP - bubble.height),
+                top: Math.round(Math.max(EDGE, top)),
                 ['--sc-tooltip-arrow-left' as string]: `${Math.round(arrow)}px`,
             });
+            setFlipped(flip);
         };
 
         place();
@@ -103,7 +121,10 @@ const TapTooltip = ({
         <div
             ref={ref}
             style={style}
-            className='tooltip-content tooltip-content__variant-base sc-chart-type-dialog__tap-tooltip'
+            className={classNames(
+                'tooltip-content tooltip-content__variant-base sc-chart-type-dialog__tap-tooltip',
+                { 'sc-chart-type-dialog__tap-tooltip--below': flipped }
+            )}
             role='tooltip'
             // The bubble lands outside the shell's wrapper, so it claims its own taps;
             // `DialogStore` closes the dialog on any document click it does not see stamped.
@@ -114,9 +135,22 @@ const TapTooltip = ({
             {/* The exact element quill puts in its own bubble, so the two match. */}
             <CaptionText color='var(--component-textIcon-inverse-default)'>{content}</CaptionText>
         </div>,
-        document.getElementById(PORTAL_ID) ?? document.body
+        portalFor(anchor)
     );
 };
+
+/**
+ * The disabled reason, for assistive tech.
+ *
+ * Both visible affordances are pointer-driven - hover on desktop, tap on mobile - so a
+ * screen-reader user has no way to trigger either. Rendering the text off-screen puts it in
+ * the reading order next to the cell it explains. Plain hidden text rather than
+ * `aria-description`, whose support is still uneven, or `aria-describedby`, which would
+ * dangle whenever the bubble is closed.
+ */
+const ScreenReaderReason = ({ reason }: { reason: string }) => (
+    <span className='sc-visually-hidden'>{reason}</span>
+);
 
 /**
  * One grid cell. Disabled cells explain *why* they are disabled; enabled ones are plain.
@@ -157,15 +191,10 @@ const Slot = observer(
             return (
                 // Deliberately not a `role='button'`: the cell it wraps already carries
                 // that role, and nesting one inside another misreports the control to a
-                // screen reader. The reason is announced from `aria-description` on the
-                // wrapper instead, which is more than the desktop hover offers.
-                <div
-                    ref={anchor}
-                    className={className}
-                    onClick={() => setTapped(open => !open)}
-                    aria-description={reason}
-                >
+                // screen reader.
+                <div ref={anchor} className={className} onClick={() => setTapped(open => !open)}>
                     {children}
+                    <ScreenReaderReason reason={reason} />
                     {tapped && <TapTooltip anchor={anchor} content={reason} onDismiss={dismiss} />}
                 </div>
             );
@@ -174,6 +203,7 @@ const Slot = observer(
         return (
             <QuillTooltip as='div' className={className} tooltipContent={reason} tooltipPosition='top' hasArrow>
                 {children}
+                <ScreenReaderReason reason={reason} />
             </QuillTooltip>
         );
     }
