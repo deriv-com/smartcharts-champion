@@ -397,6 +397,13 @@ export type TPaginationCallback = (params: TPaginationCallbackParams) => void;
 export type TIndicatorConfig = {
     id: string;
     name: string;
+    title: string;
+    /**
+     * Which instance of this indicator type this is - 0 for the first, 1 for
+     * the second, and so on. The chart appends it to the on-chart label, the
+     * same way the Indicators dialog appends it in the Active list.
+     */
+    number: number;
 };
 
 export type TIndicatorsTree = {

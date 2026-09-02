@@ -158,6 +158,12 @@ export default class StudyLegendStore {
             id: activeItem.id,
             name: activeItem.flutter_chart_id,
             title: (activeItem.short_name_and_index + (activeItem.bars ? ` (${activeItem.bars})` : '')).toUpperCase(),
+            // The chart composes its on-chart label from the indicator's own
+            // short name plus this number, so leaving it unset made every
+            // instance of a type render identically ("MACD, MACD, MACD") while
+            // the dialog's Active list numbered them. `group_length` is the
+            // same counter that list uses, so sending it keeps the two in step.
+            number: activeItem.group_length,
             ...this.transform(params),
         };
 

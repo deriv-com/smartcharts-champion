@@ -124,6 +124,46 @@
         flex: 1 0 0;
         min-inline-size: 0;
     }
+
+    /* The mobile counterpart of quill's hover tooltip, tapped open instead. Portalled out
+       of the sheet (which scrolls) and so positioned from script; only presentation lives
+       here. Box, padding and radius come from quill's own `tooltip-content` classes; what
+       is set below is what quill applies inline on its bubble, plus the two values
+       derivatives-trader corrects globally for its mobile tooltips.
+
+       Those corrections are restated rather than inherited: the host scopes them to
+       `.react-tiny-popover-container`, which this bubble is deliberately not inside, and a
+       library should not look different depending on whether its host happens to patch
+       quill. */
+    /* The `.tooltip-content` half is load-bearing, not decorative: it outweighs quill's
+       own `.tooltip-content__variant-base { color }` instead of merely tying with it. */
+    &__tap-tooltip.tooltip-content {
+        background-color: var(--component-textIcon-normal-prominent);
+        /* Above quill's modal overlay, which sits at 9999. */
+        z-index: 10000;
+        /* Quill's own `--component-textIcon-inverse-default` is only 72% opaque; the
+           design calls for the solid inverse. */
+        color: var(--component-textIcon-inverse-prominent, #fff);
+        /* 328px is the host's max; the viewport clamp keeps it off the edges on narrow
+           screens, where 328px + margins would not fit. */
+        max-inline-size: min(328px, calc(100vw - 32px));
+        inline-size: max-content;
+        text-align: center;
+
+        /* Points at the cell being explained. `--sc-tooltip-arrow-left` is set alongside
+           the position, because a bubble nudged in from a screen edge no longer lines up
+           with its cell. */
+        &:after {
+            border: 4px solid transparent;
+            border-block-end-width: 0;
+            border-block-start-color: var(--component-textIcon-normal-prominent);
+            content: '';
+            inset-block-start: 100%;
+            inset-inline-start: var(--sc-tooltip-arrow-left, 50%);
+            position: absolute;
+            transform: translateX(-50%);
+        }
+    }
     &__tile {
         align-items: center;
         background: transparent;
@@ -441,17 +481,12 @@
         padding-block: 32px;
         text-align: center;
 
-        /* The shared empty-state glyph ships without a viewBox, so `Wrapper` renders an
-           unsized <svg> - both the wrapping span and the svg need explicit dimensions. */
+        /* 64px square, per the design's "Magnifier 1" frame. The asset is 4x that so it
+           stays sharp on high-DPI screens; the element pins the displayed size. */
         &__image {
-            block-size: 96px;
+            block-size: 64px;
             display: block;
-            inline-size: 96px;
-
-            svg {
-                block-size: 96px;
-                inline-size: 96px;
-            }
+            inline-size: 64px;
         }
         &__text {
             display: flex;
@@ -864,16 +899,12 @@
         padding: 32px 16px;
         text-align: center;
 
+        /* See the drawing-tools empty state: 64px per the design, 4x asset. */
         &__image {
-            block-size: 96px;
+            block-size: 64px;
             display: block;
-            inline-size: 96px;
+            inline-size: 64px;
             margin-block-end: 8px;
-
-            svg {
-                block-size: 96px;
-                inline-size: 96px;
-            }
         }
         &__text {
             display: flex;

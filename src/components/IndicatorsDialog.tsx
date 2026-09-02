@@ -16,7 +16,7 @@ import { TActiveItem, TIndicatorItem, TSettingsParameter } from 'src/types';
 import { clone } from 'src/utils';
 import '../../sass/components/_quill-dialogs.scss';
 import DialogShell from './DialogShell';
-import { EmptyStateIcon } from './Icons';
+import EmptyStateImage from './EmptyStateImage';
 import IndicatorSettings from './IndicatorSettings';
 
 const NAV_ACTIVE = 'active';
@@ -214,7 +214,7 @@ const IndicatorsDialogBody = observer(({ searchInputClassName }: { searchInputCl
         if (!activeItems.length) {
             return (
                 <div className='sc-indicators-dialog__empty'>
-                    <EmptyStateIcon className='sc-indicators-dialog__empty__image' />
+                    <EmptyStateImage className='sc-indicators-dialog__empty__image' />
                     <div className='sc-indicators-dialog__empty__text'>
                         <p className='sc-indicators-dialog__empty__title'>{t.translate('No indicator added yet')}</p>
                         <p className='sc-indicators-dialog__empty__subtitle'>
@@ -295,6 +295,7 @@ const IndicatorsDialogBody = observer(({ searchInputClassName }: { searchInputCl
                 renderCatalogue(matches)
             ) : (
                 <div className='sc-indicators-dialog__empty'>
+                    <EmptyStateImage className='sc-indicators-dialog__empty__image' />
                     <div className='sc-indicators-dialog__empty__text'>
                         <p className='sc-indicators-dialog__empty__title'>
                             {t.translate('No results for "[text]"', { text: search })}

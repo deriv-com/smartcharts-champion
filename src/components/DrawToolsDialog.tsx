@@ -6,7 +6,7 @@ import React from 'react';
 import { useStores } from 'src/store';
 import { TIcon } from 'src/types';
 import DialogShell from './DialogShell';
-import { EmptyStateIcon } from './Icons';
+import EmptyStateImage from './EmptyStateImage';
 
 const TAB_ACTIVE = 0;
 const TAB_ALL = 1;
@@ -167,7 +167,7 @@ const DrawToolsDialogBody = observer(() => {
 
                         {tab === TAB_ACTIVE && activeItems.length === 0 && (
                             <div className='sc-draw-tools-dialog__empty'>
-                                <EmptyStateIcon className='sc-draw-tools-dialog__empty__image' />
+                                <EmptyStateImage className='sc-draw-tools-dialog__empty__image' />
                                 <div className='sc-draw-tools-dialog__empty__text'>
                                     <p className='sc-draw-tools-dialog__empty__title'>
                                         {t.translate('No drawing tool added yet')}

@@ -89,6 +89,20 @@ const config = {
                 ],
             },
             {
+                // Raster illustrations (empty states) ship as separate files rather than
+                // inlined base64, so they stay out of the JS bundle and can be cached on
+                // their own. The `.smartcharts.` in the name is deliberate: host apps already
+                // copy `dist/*.smartcharts.*` (see README), so the file travels with the
+                // chunks without anyone changing their build. At runtime the URL resolves
+                // against `__webpack_public_path__`, which hosts set via
+                // `setSmartChartsPublicPath`.
+                test: /\.webp$/,
+                type: 'asset/resource',
+                generator: {
+                    filename: '[name]-[hash:6].smartcharts.webp',
+                },
+            },
+            {
                 test: /\.(s*)css$/,
                 use: [
                     {

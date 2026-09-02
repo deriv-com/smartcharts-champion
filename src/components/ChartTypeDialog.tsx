@@ -1,7 +1,8 @@
-import { Chip, Tooltip as QuillTooltip } from '@deriv-com/quill-ui';
+import { CaptionText, Chip, Tooltip as QuillTooltip } from '@deriv-com/quill-ui';
 import classNames from 'classnames';
 import { observer } from 'mobx-react-lite';
 import React from 'react';
+import ReactDOM from 'react-dom';
 import { Intervals, STATE } from 'src/Constant';
 import { useStores } from 'src/store';
 import { INTERVALS_PER_ROW, TIntervalOption } from 'src/store/TimeperiodStore';
@@ -21,34 +22,162 @@ const chunk = <T,>(items: T[], size: number): T[][] =>
         return rows;
     }, []);
 
+const PORTAL_ID = 'smartcharts-quill-portal';
+/** Breathing room kept between the bubble and the viewport edges. */
+const EDGE = 8;
+/** Gap between the cell and the bubble pointing at it. */
+const GAP = 8;
+/** Half-width of the arrow, matching the `arrowSize: 4` quill passes on desktop. */
+const ARROW = 4;
+
 /**
- * One grid cell. Disabled cells hover to explain *why* they are disabled; enabled ones
- * are plain. Both branches render a wrapper carrying the same `className`, so swapping a
- * tooltip in never changes the flex layout - without that, tooltip-wrapped cells collapse
- * while their unwrapped siblings stretch.
+ * The tap-driven equivalent of quill's hover tooltip.
  *
- * Tooltips are suppressed on mobile, where there is no hover.
+ * Portalled and fixed rather than positioned inside the sheet: the sheet scrolls
+ * (`overflow: auto`) and its tiles sit only a heading's height below its top edge, so a
+ * bubble rendered in place would be clipped. Borrows quill's own `tooltip-content` classes
+ * so it is the same bubble the desktop hover shows.
  */
-const Slot = ({
-    reason,
-    show,
-    className,
-    children,
+const TapTooltip = ({
+    anchor,
+    content,
+    onDismiss,
 }: {
-    reason?: string;
-    show: boolean;
-    className: string;
-    children: React.ReactNode;
+    anchor: React.RefObject<HTMLElement>;
+    content: string;
+    onDismiss: () => void;
 }) => {
-    if (show && reason) {
+    const ref = React.useRef<HTMLDivElement>(null);
+    const [style, setStyle] = React.useState<React.CSSProperties>({
+        left: 0,
+        position: 'fixed',
+        top: 0,
+        visibility: 'hidden',
+    });
+
+    React.useLayoutEffect(() => {
+        const place = () => {
+            const cell = anchor.current?.getBoundingClientRect();
+            const bubble = ref.current?.getBoundingClientRect();
+            if (!cell || !bubble) return;
+
+            // Centred over the cell, nudged in when that would overhang the screen.
+            const cellCentre = cell.left + cell.width / 2;
+            const maxLeft = window.innerWidth - EDGE - bubble.width;
+            const left = Math.max(EDGE, Math.min(cellCentre - bubble.width / 2, maxLeft));
+
+            // The arrow tracks the cell, not the bubble - a bubble nudged off an edge is
+            // no longer centred on what it describes, and an arrow left in the middle
+            // would point at the wrong tile. Kept clear of the rounded corners.
+            const arrow = Math.max(ARROW * 2, Math.min(cellCentre - left, bubble.width - ARROW * 2));
+
+            setStyle({
+                left: Math.round(left),
+                position: 'fixed',
+                top: Math.round(cell.top - GAP - bubble.height),
+                ['--sc-tooltip-arrow-left' as string]: `${Math.round(arrow)}px`,
+            });
+        };
+
+        place();
+        window.addEventListener('resize', place);
+        window.addEventListener('scroll', place, true);
+        return () => {
+            window.removeEventListener('resize', place);
+            window.removeEventListener('scroll', place, true);
+        };
+    }, [anchor]);
+
+    // Any tap that is not on this bubble or the cell it belongs to dismisses it. Taps on
+    // another disabled cell land here first, so only one bubble is ever up.
+    React.useEffect(() => {
+        const onPointerDown = (e: PointerEvent) => {
+            const target = e.target as Node;
+            if (!ref.current?.contains(target) && !anchor.current?.contains(target)) onDismiss();
+        };
+        document.addEventListener('pointerdown', onPointerDown);
+        return () => document.removeEventListener('pointerdown', onPointerDown);
+    }, [anchor, onDismiss]);
+
+    return ReactDOM.createPortal(
+        <div
+            ref={ref}
+            style={style}
+            className='tooltip-content tooltip-content__variant-base sc-chart-type-dialog__tap-tooltip'
+            role='tooltip'
+            // The bubble lands outside the shell's wrapper, so it claims its own taps;
+            // `DialogStore` closes the dialog on any document click it does not see stamped.
+            onClickCapture={e => {
+                (e.nativeEvent as unknown as { isHandledByDialog?: boolean }).isHandledByDialog = true;
+            }}
+        >
+            {/* The exact element quill puts in its own bubble, so the two match. */}
+            <CaptionText color='var(--component-textIcon-inverse-default)'>{content}</CaptionText>
+        </div>,
+        document.getElementById(PORTAL_ID) ?? document.body
+    );
+};
+
+/**
+ * One grid cell. Disabled cells explain *why* they are disabled; enabled ones are plain.
+ * Both branches render a wrapper carrying the same `className`, so swapping a tooltip in
+ * never changes the flex layout - without that, tooltip-wrapped cells collapse while their
+ * unwrapped siblings stretch.
+ *
+ * Desktop reveals the reason on hover, via quill's tooltip. Touch has no hover and quill
+ * keeps its tooltip's open state private, so mobile taps the cell to reveal the same text
+ * and taps anywhere else to dismiss it.
+ */
+const Slot = observer(
+    ({
+        reason,
+        show,
+        className,
+        children,
+    }: {
+        reason?: string;
+        show: boolean;
+        className: string;
+        children: React.ReactNode;
+    }) => {
+        const { chart } = useStores();
+        const { isMobile } = chart;
+        const anchor = React.useRef<HTMLDivElement>(null);
+        const [tapped, setTapped] = React.useState(false);
+        const dismiss = React.useCallback(() => setTapped(false), []);
+
+        // A cell that stops being disabled while its bubble is up should not keep it.
+        React.useEffect(() => {
+            if (!show || !reason) setTapped(false);
+        }, [show, reason]);
+
+        if (!show || !reason) return <div className={className}>{children}</div>;
+
+        if (isMobile) {
+            return (
+                // Deliberately not a `role='button'`: the cell it wraps already carries
+                // that role, and nesting one inside another misreports the control to a
+                // screen reader. The reason is announced from `aria-description` on the
+                // wrapper instead, which is more than the desktop hover offers.
+                <div
+                    ref={anchor}
+                    className={className}
+                    onClick={() => setTapped(open => !open)}
+                    aria-description={reason}
+                >
+                    {children}
+                    {tapped && <TapTooltip anchor={anchor} content={reason} onDismiss={dismiss} />}
+                </div>
+            );
+        }
+
         return (
             <QuillTooltip as='div' className={className} tooltipContent={reason} tooltipPosition='top' hasArrow>
                 {children}
             </QuillTooltip>
         );
     }
-    return <div className={className}>{children}</div>;
-};
+);
 
 const ChartTypeTile = observer(
     ({
@@ -95,8 +224,7 @@ const ChartTypeTile = observer(
  * alone and only this content updates.
  */
 const ChartTypeDialogBody = observer(({ onChartType, onGranularity }: TChartTypeDialogProps) => {
-    const { chart, chartType, timeperiod, state, loader } = useStores();
-    const { isMobile } = chart;
+    const { chartType, timeperiod, state, loader } = useStores();
     const { isActive: isLoading } = loader;
     const { types, type, setChartType, updateProps: updateChartTypeProps } = chartType;
     const { intervals, changeGranularity, setGranularity, updateProps: updateIntervalProps } = timeperiod;
@@ -128,9 +256,10 @@ const ChartTypeDialogBody = observer(({ onChartType, onGranularity }: TChartType
         changeGranularity(option.interval);
     };
 
-    // Tooltips explain disabled options; there is no hover on touch, and a spinner
-    // already communicates "busy", so suppress them in both cases.
-    const showTooltips = !isMobile && !isLoading;
+    // Tooltips explain disabled options on both platforms - hover on desktop, tap on
+    // mobile (see `Slot`). A spinner already communicates "busy", so they are suppressed
+    // only while loading.
+    const showTooltips = !isLoading;
 
     return (
         <div className='sc-chart-type-dialog__content'>

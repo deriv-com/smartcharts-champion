@@ -1,4 +1,5 @@
 import 'dart:js_interop';
+import 'package:chart_app/src/misc/web_chart_themes.dart';
 import 'dart:js_interop_unsafe';
 
 import 'package:chart_app/src/helpers/color.dart';
@@ -18,7 +19,7 @@ class ChartConfigModel extends ChangeNotifier {
     final Object? initialTheme =
         web.window.getProperty('flutterChartTheme'.toJS)?.dartify();
     if (initialTheme == 'dark') {
-      theme = ChartDefaultDarkTheme();
+      theme = WebChartDarkTheme();
     }
   }
 
@@ -29,7 +30,7 @@ class ChartConfigModel extends ChangeNotifier {
   int? granularity;
 
   /// Theme of the chart
-  ChartTheme theme = ChartDefaultLightTheme();
+  ChartTheme theme = WebChartLightTheme();
 
   /// Markers
   List<MarkerGroup> markerGroupList = <MarkerGroup>[];
@@ -171,7 +172,7 @@ class ChartConfigModel extends ChangeNotifier {
   /// To update the theme of the chart
   void updateTheme(String _theme) {
     theme =
-        _theme == 'dark' ? ChartDefaultDarkTheme() : ChartDefaultLightTheme();
+        _theme == 'dark' ? WebChartDarkTheme() : WebChartLightTheme();
     notifyListeners();
   }
 
@@ -226,8 +227,8 @@ class ChartConfigModel extends ChangeNotifier {
 
     if (payload.theme != null && payload.theme!.isNotEmpty) {
       theme = payload.theme == 'dark'
-          ? ChartDefaultDarkTheme()
-          : ChartDefaultLightTheme();
+          ? WebChartDarkTheme()
+          : WebChartLightTheme();
     }
 
     notifyListeners();
