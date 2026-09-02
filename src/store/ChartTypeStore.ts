@@ -96,15 +96,31 @@ export default class ChartTypeStore {
     }
 
     get types() {
+        const { state } = this.mainStore;
         const isTickSelected = this.mainStore.chart.granularity === 0;
         if (this.chartTypes === undefined || this.chartTypes.length === 0) {
             this.chartTypes = [...ChartTypes];
         }
-        return this.chartTypes.map(t => ({
-            ...t,
-            active: t.id === this.type.id,
-            disabled: t.candleOnly ? isTickSelected : false,
-        }));
+        return this.chartTypes.map(chartType => {
+            // A host restriction (e.g. Accumulators) outranks the tick/candle rule, because
+            // its message explains the whole restriction rather than just the interval clash.
+            const isRestricted = !state.isChartTypeAllowed(chartType.id);
+            const isTickBlocked = !!chartType.candleOnly && isTickSelected;
+
+            let disabledReason: string | undefined;
+            if (isRestricted) {
+                disabledReason = state.restrictionMessage;
+            } else if (isTickBlocked) {
+                disabledReason = t.translate('Available only for non-tick time intervals.');
+            }
+
+            return {
+                ...chartType,
+                active: chartType.id === this.type.id,
+                disabled: isRestricted || isTickBlocked,
+                disabledReason,
+            };
+        });
     }
 
     isTypeCandle(type: ChartType | string) {

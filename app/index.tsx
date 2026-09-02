@@ -32,6 +32,9 @@ import {
     ActiveSymbols,
 } from 'src/types';
 import 'url-search-params-polyfill';
+// The library treats quill as a peer dependency and leaves its stylesheet to the host.
+// The sample app is that host, so it loads quill's tokens and component CSS itself.
+import '@deriv-com/quill-ui/dist/assets/quill-ui.css';
 import './app.scss';
 import ChartHistory from './ChartHistory';
 import ChartNotifier from './ChartNotifier';

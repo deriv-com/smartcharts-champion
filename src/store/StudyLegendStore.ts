@@ -1,5 +1,4 @@
 import { action, observable, reaction, when, makeObservable } from 'mobx';
-import React from 'react';
 import Context from 'src/components/ui/Context';
 import { getUniqueId, hexToInt } from 'src/components/ui/utils';
 import { TActiveItem, TIndicatorConfig, TSettingsParameter } from 'src/types';
@@ -17,42 +16,59 @@ import {
 } from '../utils';
 import { LogActions, LogCategories, logEvent } from '../utils/ga';
 import MenuStore from './MenuStore';
-import SettingsDialogStore from './SettingsDialogStore';
+
+/**
+ * Parameter paths that were corrected after layouts had already been saved with the old
+ * spelling.
+ *
+ * A path is catalogue metadata rather than user data, but it is persisted next to the value,
+ * so a stored layout keeps whatever spelling was current when it was saved. These two never
+ * matched the keys the chart actually reads, so the bar colours on MACD, ADX, Awesome
+ * Oscillator and Gator silently did nothing; rewriting them on restore repairs layouts that
+ * predate the fix.
+ */
+const RENAMED_PARAMETER_PATHS: Record<string, string> = {
+    'barStyle.bullishColor': 'barStyle.positiveColor',
+    'barStyle.bearishColor': 'barStyle.negativeColor',
+};
+
+const migrateParameterPaths = (parameters?: TSettingsParameter[]) =>
+    parameters?.forEach(parameter => {
+        const renamed = parameter.path && RENAMED_PARAMETER_PATHS[parameter.path];
+        if (renamed) parameter.path = renamed;
+    });
 
 export default class StudyLegendStore {
     mainStore: MainStore;
     menuStore: MenuStore;
-    searchInput: React.RefObject<HTMLInputElement>;
-    settingsDialog: SettingsDialogStore;
-    selectedTab = 1;
     filterText = '';
     activeItems: TActiveItem[] = [];
-    infoItem: (TActiveItem & { disabledAddBtn?: boolean }) | null = null;
-    portalNodeIdChanged? = '';
     currentHoverIndex: number | undefined | null = null;
     previousHoverIndex: number | undefined | null = null;
+    /**
+     * Set when something outside the dialog asks to edit an active indicator - the chart's own
+     * gear button, or a double-click on an indicator series. The dialog consumes it on open and
+     * clears it; see `requestEdit`.
+     */
+    pendingEditId: string | null = null;
 
     constructor(mainStore: MainStore) {
         makeObservable(this, {
-            selectedTab: observable,
             filterText: observable,
             activeItems: observable,
-            infoItem: observable,
-            portalNodeIdChanged: observable,
-            onSelectItem: action.bound,
+            pendingEditId: observable,
+            addIndicator: action.bound,
+            applyIndicatorSettings: action.bound,
+            getDefaultParameters: action.bound,
             updateStyle: action.bound,
-            updateProps: action.bound,
-            editStudy: action.bound,
             editStudyByIndex: action.bound,
+            requestEdit: action.bound,
+            clearPendingEdit: action.bound,
             deleteStudy: action.bound,
             deleteStudyById: action.bound,
-            updateStudy: action.bound,
             deletePredictionStudies: action.bound,
             deleteAllStudies: action.bound,
-            onSelectTab: action.bound,
             setFilterText: action.bound,
-            onInfoItem: action.bound,
-            updatePortalNode: action.bound,
             restoreStudies: action.bound,
             getItemById: action.bound,
             setIndicator: action.bound,
@@ -63,26 +79,16 @@ export default class StudyLegendStore {
         this.mainStore = mainStore;
         when(() => !!this.context, this.onContextReady);
         this.menuStore = new MenuStore(mainStore, { route: 'indicators' });
-        this.settingsDialog = new SettingsDialogStore({
-            mainStore,
-            onDeleted: this.deleteStudyById,
-            favoritesId: 'indicators',
-            onChanged: (items: TSettingsParameter[]) => this.updateStudy(items),
-        });
-        this.searchInput = React.createRef();
         reaction(
             () => this.menuStore.open,
             () => {
                 if (!this.menuStore.open) {
                     this.setFilterText('');
+                    this.clearPendingEdit();
                 }
-                setTimeout(() => {
-                    if (this.searchInput && this.searchInput.current) this.searchInput.current.focus();
-                }, 400);
             }
         );
     }
-    searchInputClassName?: string;
 
     onContextReady = () => {
         // to remove studies if user has already more than 5
@@ -105,17 +111,6 @@ export default class StudyLegendStore {
             return indicator;
         });
     }
-    get searchedItems() {
-        return [...getIndicatorsTree()]
-            .map(category => {
-                category.foundItems = category.items.filter(
-                    item => item.name.toLowerCase().indexOf(this.filterText.toLowerCase().trim()) !== -1
-                ) as unknown as TActiveItem[];
-                return category;
-            })
-            .filter(category => category.foundItems?.length);
-    }
-
     get hasPredictionIndicator() {
         return (this.activeItems || []).filter((item: TActiveItem) => item.isPrediction).length > 0;
     }
@@ -163,48 +158,118 @@ export default class StudyLegendStore {
             id: activeItem.id,
             name: activeItem.flutter_chart_id,
             title: (activeItem.short_name_and_index + (activeItem.bars ? ` (${activeItem.bars})` : '')).toUpperCase(),
+            // The chart composes its on-chart label from the indicator's own
+            // short name plus this number, so leaving it unset made every
+            // instance of a type render identically ("MACD, MACD, MACD") while
+            // the dialog's Active list numbered them. `group_length` is the
+            // same counter that list uses, so sending it keeps the two in step.
+            number: activeItem.group_length,
             ...this.transform(params),
         };
 
         this.mainStore.chartAdapter.flutterChart?.app.addOrUpdateIndicator(JSON.stringify(config), index);
     };
 
-    onSelectItem(indicatorName: string) {
-        this.onInfoItem(null);
+    /**
+     * Parameters for an indicator, seeded from its defaults and adjusted for the current
+     * theme. The redesigned dialog stages these in the settings view before anything is
+     * committed, so this hands back a detached copy the caller is free to mutate.
+     */
+    getDefaultParameters(flutterChartId: string): TSettingsParameter[] {
+        const { parameters } = getDefaultIndicatorConfig(flutterChartId) || {};
+        if (!parameters) return [];
 
-        if (this.activeItems.length >= this.maxAllowedItem) return;
+        const seeded = parameters.map(parameter => ({
+            ...parameter,
+            value: clone(parameter.defaultValue),
+        })) as TSettingsParameter[];
+
+        transformStudiesforTheme(seeded, this.mainStore.chartSetting.theme);
+        return seeded;
+    }
+
+    /**
+     * Adds an indicator using explicit parameters.
+     *
+     * The dialog walks the user through the settings page before anything reaches the chart,
+     * so the values they see are the ones committed here. Passing no parameters falls back to
+     * the theme-adjusted defaults.
+     */
+    addIndicator(flutterChartId: string, parameters?: TSettingsParameter[]) {
+        if (this.activeItems.length >= this.maxAllowedItem) return undefined;
+
+        const props = this.getIndicatorProps(flutterChartId);
+        const { config } = getDefaultIndicatorConfig(flutterChartId) || {};
+        if (!props) return undefined;
+
+        const finalParameters = parameters?.length ? parameters : this.getDefaultParameters(flutterChartId);
 
         this.changeStudyPanelTitle();
-        logEvent(LogCategories.ChartControl, LogActions.Indicator, `Add ${indicatorName}`);
+        logEvent(LogCategories.ChartControl, LogActions.Indicator, `Add ${flutterChartId}`);
 
-        const props = this.getIndicatorProps(indicatorName);
-        const { parameters, config } = getDefaultIndicatorConfig(indicatorName);
+        const nameObj = prepareIndicatorName(flutterChartId, finalParameters);
+        const lastGroupItem = this.findLastActiveItem(flutterChartId);
+        const group_length = lastGroupItem ? lastGroupItem.group_length + 1 : 0;
 
-        if (props && parameters) {
-            parameters.map(p => (p.value = clone(p.defaultValue)));
-            const nameObj = prepareIndicatorName(this.settingsDialog.flutter_chart_id, parameters);
+        const item: TActiveItem = {
+            ...props,
+            group_length,
+            short_name_and_index: props.short_name + (group_length ? ` ${group_length}` : ''),
+            id: getUniqueId(),
+            config,
+            parameters: finalParameters,
+            bars: nameObj.bars,
+        };
 
-            const lastGroupItem = this.findLastActiveItem(props.flutter_chart_id);
-            const group_length = lastGroupItem ? lastGroupItem.group_length + 1 : 0;
+        this.addOrUpdateIndicator(item);
+        this.activeItems.push(item);
 
-            const item: TActiveItem = {
-                ...props,
-                group_length,
-                short_name_and_index: props.short_name + (group_length ? ` ${group_length}` : ''),
-                id: getUniqueId(),
-                config,
-                parameters,
-                bars: nameObj.bars,
-            };
+        this.mainStore.state.stateChange(STATE.INDICATOR_ADDED, {
+            indicator_type_name: flutterChartId,
+            indicators_category_name: getIndicatorCategoryName(flutterChartId),
+        });
+        this.mainStore.bottomWidgetsContainer.updateChartHeight();
+        this.mainStore.state.saveLayout();
 
-            transformStudiesforTheme(parameters, this.mainStore.chartSetting.theme);
+        return item;
+    }
 
-            this.addOrUpdateIndicator(item);
-            this.activeItems.push(item);
+    /**
+     * Commits staged parameters to an already-active indicator, addressed by its id.
+     *
+     * The dialog owns its own staging and names the target directly. The array index is
+     * resolved fresh because it doubles as the Flutter indicator index.
+     */
+    applyIndicatorSettings(activeItemId: string, parameters: TSettingsParameter[]) {
+        const index = this.activeItems.findIndex(item => item.id === activeItemId);
+        if (index === -1) return;
 
-            this.mainStore.bottomWidgetsContainer.updateChartHeight();
-            this.mainStore.state.saveLayout();
-        }
+        const current = this.activeItems[index];
+        const props = this.getIndicatorProps(current.flutter_chart_id);
+        const { config } = getDefaultIndicatorConfig(current.flutter_chart_id) || {};
+        if (!props) return;
+
+        this.changeStudyPanelTitle();
+
+        const nameObj = prepareIndicatorName(current.flutter_chart_id, parameters);
+        const item: TActiveItem = {
+            ...props,
+            group_length: current.group_length,
+            short_name_and_index: props.short_name + (current.group_length ? ` ${current.group_length}` : ''),
+            id: activeItemId,
+            config,
+            parameters,
+            bars: nameObj.bars,
+        };
+
+        this.activeItems[index] = item;
+
+        this.mainStore.state.stateChange(STATE.INDICATOR_EDITED, {
+            indicator_type_name: item.flutter_chart_id,
+            indicators_category_name: getIndicatorCategoryName(item.flutter_chart_id),
+        });
+        this.addOrUpdateIndicator(item, index);
+        this.mainStore.state.saveLayout();
     }
 
     async restoreStudies(activeItems: TActiveItem[]) {
@@ -214,6 +279,7 @@ export default class StudyLegendStore {
             const props = this.getIndicatorProps(activeItem.flutter_chart_id);
 
             if (props) {
+                migrateParameterPaths(activeItem.parameters);
                 this.addOrUpdateIndicator(activeItem);
                 Object.assign(activeItem, props);
             } else {
@@ -241,31 +307,31 @@ export default class StudyLegendStore {
         const should_minimise_last_digit = this.mainStore.studies.activeItems.length > 2;
         this.mainStore.state.setShouldMinimiseLastDigit(should_minimise_last_digit);
     }
-    updateProps({ searchInputClassName }: { searchInputClassName?: string }) {
-        this.searchInputClassName = searchInputClassName;
-    }
-
     editStudyByIndex(index: number) {
         const activeItem = this.activeItems[index];
-        if (activeItem) this.editStudy(activeItem);
+        if (activeItem) this.requestEdit(activeItem.id);
     }
 
-    editStudy(study: TActiveItem) {
+    /**
+     * Opens the indicators dialog straight onto an active indicator's settings.
+     *
+     * The dialog stages parameters in local state, so it - not the store - decides what the
+     * settings view shows. The request is therefore left here as an id for the dialog to pick
+     * up when it mounts, rather than pushed into it.
+     */
+    requestEdit(activeItemId: string) {
+        const study = this.getItemById(activeItemId);
+        if (!study) return;
+
         logEvent(LogCategories.ChartControl, LogActions.Indicator, `Edit ${study.flutter_chart_id}`);
-
-        this.settingsDialog.id = study.id;
-        this.settingsDialog.flutter_chart_id = study.flutter_chart_id;
-        this.settingsDialog.items = study.parameters;
-        this.settingsDialog.title = study.name;
-        this.settingsDialog.formTitle = t.translate('Result');
-        this.settingsDialog.formClassname = `form--${study.id.toLowerCase().replace(/ /g, '-')}`;
-        // TODO:
-        // const description = StudyInfo[study.sd.type];
-        // this.settingsDialog.description = description || t.translate("No description yet");
-        this.settingsDialog.description = '';
-        this.settingsDialog.dialogPortalNodeId = this.portalNodeIdChanged;
-        this.settingsDialog.setOpen(true);
+        this.pendingEditId = activeItemId;
+        this.menuStore.setOpen(true);
     }
+
+    clearPendingEdit() {
+        this.pendingEditId = null;
+    }
+
     deleteStudyById(id: string) {
         const index = this.activeItems.findIndex(item => item.id === id);
         this.mainStore.chartAdapter.flutterChart?.indicators.removeIndicator(index);
@@ -281,38 +347,6 @@ export default class StudyLegendStore {
         this.mainStore.bottomWidgetsContainer.updateChartHeight();
         this.renderLegend();
         this.mainStore.state.saveLayout();
-    }
-    updateStudy(parameters: TSettingsParameter[]) {
-        this.changeStudyPanelTitle();
-
-        const props = this.getIndicatorProps(this.settingsDialog.flutter_chart_id);
-        const { config } = getDefaultIndicatorConfig(this.settingsDialog.flutter_chart_id) || {};
-
-        if (props && parameters) {
-            const nameObj = prepareIndicatorName(this.settingsDialog.flutter_chart_id, parameters);
-            const index = this.activeItems.findIndex(item => item.id === this.settingsDialog.id);
-            const currentActiveItem = this.activeItems[index];
-
-            const item: TActiveItem = {
-                ...props,
-                short_name_and_index:
-                    props.short_name + (currentActiveItem.group_length ? ` ${currentActiveItem.group_length}` : ''),
-                group_length: currentActiveItem.group_length,
-                id: this.settingsDialog.id,
-                bars: nameObj.bars,
-                parameters,
-                config,
-            };
-
-            this.activeItems[index] = item;
-
-            this.mainStore.state.stateChange(STATE.INDICATOR_EDITED, {
-            indicator_type_name: item.flutter_chart_id,
-            indicators_category_name: getIndicatorCategoryName(item.flutter_chart_id),
-            });
-            this.addOrUpdateIndicator(item, index);
-            this.mainStore.state.saveLayout();
-        }
     }
     changeStudyPanelTitle() {
         // Remove numbers from the end of indicator titles in mobile
@@ -367,24 +401,9 @@ export default class StudyLegendStore {
         this.mainStore.state.saveLayout();
     }
 
-    onSelectTab(tabIndex: number) {
-        this.setFilterText('');
-        this.selectedTab = tabIndex;
-        this.onInfoItem(null);
-    }
     setFilterText(filterText: string) {
-        this.selectedTab = filterText !== '' ? 0 : 1;
         this.filterText = filterText;
         this.mainStore.state.debouncedStateChange(STATE.INDICATOR_SEARCH, { search_string: filterText });
-    }
-
-    onInfoItem(study: TActiveItem | null) {
-        this.infoItem = study
-            ? {
-                  ...study,
-                  disabledAddBtn: study.isPrediction && this.mainStore.timeperiod.isTick,
-              }
-            : study;
     }
 
     setIndicator(item: TActiveItem, index: number) {
@@ -433,10 +452,6 @@ export default class StudyLegendStore {
         if (item) {
             this.setIndicator(item, index);
         }
-    }
-
-    updatePortalNode(portalNodeId?: string) {
-        this.portalNodeIdChanged = portalNodeId;
     }
 
     findLastActiveItem(flutter_chart_id: string) {

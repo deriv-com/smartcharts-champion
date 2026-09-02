@@ -11,6 +11,11 @@ declare module '*.svg' {
     const content: React.SVGAttributes<SVGElement>;
     export default content;
 }
+declare module '*.webp' {
+    /** Emitted as a separate file by webpack; the import is its resolved URL. */
+    const url: string;
+    export default url;
+}
 
 interface Window {
     isProductionWebsite?: boolean;

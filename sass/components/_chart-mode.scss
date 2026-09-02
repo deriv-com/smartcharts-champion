@@ -1,7 +1,6 @@
+// Toolbar trigger for the chart type / time interval dialog.
+// The dialog surface itself is styled in _quill-dialogs.scss.
 .sc-chart-mode {
-    .sc-dialog {
-        width: 424px;
-    }
     &__menu {
         position: relative;
 
@@ -35,31 +34,5 @@
                 color: themed('IntervalBadgeColor');
             }
         }
-    }
-    &__section {
-        border-radius: $border-radius;
-
-        @include themify($themes) {
-            background: themed('ChartModeBg');
-        }
-
-        &__item {
-            &:first-child {
-                @include themify($themes) {
-                    border-bottom: 4px solid themed('ChartModeBorder');
-                }
-            }
-        }
-    }
-}
-
-.smartcharts-mobile {
-    .sc-chart-mode .sc-dialog {
-        width: 300px;
-        left: auto;
-        // Height is content-driven, capped to the viewport, so the dialog never
-        // leaves dead space below the last time interval.
-        max-height: calc(100% - 32px);
-        overflow-x: inherit;
     }
 }

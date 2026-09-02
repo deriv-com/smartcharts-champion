@@ -1,4 +1,4 @@
-import { action, observable, reaction, when, makeObservable } from 'mobx';
+import { action, computed, observable, reaction, when, makeObservable } from 'mobx';
 import { TGranularity } from 'src/types';
 import { ChartTypes, Intervals, STATE } from 'src/Constant';
 import MainStore from '.';
@@ -20,6 +20,25 @@ const TimeMap = {
     day: 86400,
 };
 
+// Compact suffixes used by the redesigned interval chips: "1m", "30m", "2h", "1d".
+// Tick is the exception and keeps its word, matching the design's "1 tick".
+const CompactUnitMap: Record<string, string> = {
+    minute: 'm',
+    hour: 'h',
+    day: 'd',
+};
+
+/** Number of interval chips per row in the redesigned dialog (5 / 5 / 3). */
+export const INTERVALS_PER_ROW = 5;
+
+export type TIntervalOption = {
+    interval: TGranularity;
+    label: string;
+    active: boolean;
+    disabled: boolean;
+    disabledReason?: string;
+};
+
 export default class TimeperiodStore {
     _serverTime: ReturnType<typeof ServerTime.getInstance>;
     mainStore: MainStore;
@@ -33,6 +52,7 @@ export default class TimeperiodStore {
             setGranularity: action.bound,
             updateProps: action.bound,
             updatePortalNode: action.bound,
+            intervals: computed,
         });
 
         this.mainStore = mainStore;
@@ -160,6 +180,49 @@ export default class TimeperiodStore {
         }
     }
 
+    /**
+     * Flat, display-ready interval list for the redesigned chart-type dialog.
+     * The natural order of `Intervals` already yields the design's 5/5/3 rows once
+     * chunked by INTERVALS_PER_ROW, so no manual grouping is needed.
+     */
+    get intervals(): TIntervalOption[] {
+        const { state, chartType, chart } = this.mainStore;
+        const chartTypeId = chartType.type?.id;
+
+        return Intervals.flatMap(category =>
+            category.items.map(item => {
+                const isTick = category.key === 'tick';
+                const label = isTick
+                    ? `${item.num} ${t.translate(category.single)}`
+                    : `${item.num}${CompactUnitMap[category.key] ?? ''}`;
+
+                // Host restriction (e.g. Accumulators) outranks the per-chart-type rules.
+                const isRestricted = !state.isGranularityAllowed(item.interval);
+                const isTickBlocked = isTick && chartTypeId !== 'line';
+                const isNonTickBlocked = !isTick && !!state.allowTickChartTypeOnly;
+
+                let disabledReason: string | undefined;
+                if (isRestricted) {
+                    disabledReason = state.restrictionMessage;
+                } else if (isTickBlocked) {
+                    disabledReason = t.translate('Available only for "Area" chart type.');
+                } else if (isNonTickBlocked) {
+                    disabledReason = t.translate(
+                        'Only selected charts and time intervals are available for this trade type.'
+                    );
+                }
+
+                return {
+                    interval: item.interval,
+                    label,
+                    active: item.interval === chart.granularity,
+                    disabled: isRestricted || isTickBlocked || isNonTickBlocked,
+                    disabledReason,
+                };
+            })
+        );
+    }
+
     changeGranularity(interval: TGranularity) {
         if (interval) {
             const chart_type_name = ChartTypes.find(type => type.id === this.mainStore.chartType.type.id)?.text ?? '';
@@ -172,7 +235,6 @@ export default class TimeperiodStore {
             });
         }
         if (interval === 0 && this.mainStore.studies.hasPredictionIndicator) {
-            this.predictionIndicator.dialogPortalNodeId = this.portalNodeIdChanged;
             this.predictionIndicator.setOpen(true);
         } else {
             this.onGranularityChange(interval);

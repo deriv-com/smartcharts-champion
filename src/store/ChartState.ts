@@ -79,6 +79,9 @@ class ChartState {
     isChartClosed = false;
     shouldMinimiseLastDigits = false;
     allowTickChartTypeOnly?: boolean;
+    allowedChartTypes?: string[];
+    allowedGranularities?: TGranularity[];
+    restrictionMessage?: string;
     isStaticChart? = false;
     shouldFetchTradingTimes = true;
     shouldGetQuotes = true;
@@ -133,6 +136,11 @@ class ChartState {
             settings: observable,
             showLastDigitStats: observable,
             allowTickChartTypeOnly: observable,
+            allowedChartTypes: observable,
+            allowedGranularities: observable,
+            restrictionMessage: observable,
+            isChartTypeAllowed: false,
+            isGranularityAllowed: false,
             scrollToEpoch: observable,
             clearChart: observable,
             isChartClosed: observable,
@@ -159,7 +167,7 @@ class ChartState {
         this.mainStore = mainStore;
         this.chartStore = mainStore.chart;
         when(() => !!this.context, this.onContextReady);
-        
+
         // Save layout before page unload (refresh)
         window.addEventListener('beforeunload', () => {
             this.saveLayout();
@@ -178,6 +186,19 @@ class ChartState {
     onContextReady = () => {
         this.granularity = this.chartStore.granularity;
     };
+
+    /**
+     * Host-driven allow-lists. An absent or empty list means "no restriction", so
+     * consumers that never pass these props are unaffected.
+     */
+    isChartTypeAllowed(chartTypeId: string) {
+        // indexOf rather than includes: the project targets ES5 with no explicit `lib`.
+        return !this.allowedChartTypes?.length || this.allowedChartTypes.indexOf(chartTypeId) !== -1;
+    }
+
+    isGranularityAllowed(granularity: TGranularity) {
+        return !this.allowedGranularities?.length || this.allowedGranularities.indexOf(granularity) !== -1;
+    }
 
     updateProps({
         networkStatus,
@@ -206,6 +227,9 @@ class ChartState {
         contractInfo = {},
         showLastDigitStats = false,
         allowTickChartTypeOnly = false,
+        allowedChartTypes,
+        allowedGranularities,
+        restrictionMessage,
         startEpoch,
         symbol,
         zoom,
@@ -281,6 +305,9 @@ class ChartState {
         this.shouldFetchTradingTimes = shouldFetchTradingTimes;
         this.shouldGetQuotes = shouldGetQuotes;
         this.allowTickChartTypeOnly = allowTickChartTypeOnly;
+        this.allowedChartTypes = allowedChartTypes;
+        this.allowedGranularities = allowedGranularities;
+        this.restrictionMessage = restrictionMessage;
         this.allTicks = allTicks;
         this.contractInfo = contractInfo;
         this.showLastDigitStats = showLastDigitStats;
