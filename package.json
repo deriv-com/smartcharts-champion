@@ -122,7 +122,7 @@
         "inquirer": "^9.2.19",
         "json-loader": "^0.5.7",
         "lint-staged": "^10.4.0",
-        "md5-file": "^4.0.0",
+        "md5-file": "^5.0.0",
         "mini-css-extract-plugin": "^2.7.5",
         "mkdirp": "^0.5.1",
         "mobx-undecorate": "^1.2.0",
