@@ -11,12 +11,6 @@ import EmptyStateImage from './EmptyStateImage';
 const TAB_ACTIVE = 0;
 const TAB_ALL = 1;
 
-/**
- * Quoted in the empty state ("You can add up to 3 drawing tools."), per the design.
- * NOTE: nothing in the library enforces this yet - it is copy only.
- */
-const MAX_DRAW_TOOLS = 3;
-
 type TDrawToolRowProps = {
     Icon?: TIcon;
     label: string;
@@ -171,11 +165,6 @@ const DrawToolsDialogBody = observer(() => {
                                 <div className='sc-draw-tools-dialog__empty__text'>
                                     <p className='sc-draw-tools-dialog__empty__title'>
                                         {t.translate('No drawing tool added yet')}
-                                    </p>
-                                    <p className='sc-draw-tools-dialog__empty__subtitle'>
-                                        {t.translate('You can add up to [num] drawing tools.', {
-                                            num: MAX_DRAW_TOOLS,
-                                        })}
                                     </p>
                                 </div>
                             </div>
