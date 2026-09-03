@@ -345,9 +345,9 @@
     }
 
     /* Both tabs share one fixed-height content box, on desktop and mobile alike, so
-       switching tabs never resizes the dialog or the sheet. Sized to the tallest of the two
-       default states - the empty state, which is taller than the three-tool list. Longer
-       lists scroll inside it, which keeps the title, the tab switch and "Clear all" pinned. */
+       switching tabs never resizes the dialog or the sheet. Comfortably fits both default
+       states - the empty state and the full tool list - and longer lists scroll inside it,
+       which keeps the title, the tab switch and "Clear all" pinned. */
     &__tab-content {
         block-size: 216px;
         display: flex;
@@ -523,13 +523,6 @@
             color: var(--semantic-color-slate-solid-textIcon-normal-highest);
             font-size: 14px;
             font-weight: 700;
-            line-height: 1.5;
-            margin: 0;
-        }
-        &__subtitle {
-            color: var(--component-textIcon-normal-subtle);
-            font-size: 14px;
-            font-weight: 400;
             line-height: 1.5;
             margin: 0;
         }
