@@ -101,6 +101,11 @@
     &.sc-draw-tools-dialog {
         inline-size: 512px;
     }
+
+    /* Narrower than its siblings: two tiles and a sentence, with no list to give room to. */
+    &.sc-download-dialog {
+        inline-size: 400px;
+    }
 }
 
 /* Chart type + Time interval ------------------------------------------------ */
@@ -259,7 +264,7 @@
         }
 
         /* "1 tick" is the widest label and must stay on one line, as in the design. */
-        > p {
+        >p {
             white-space: nowrap;
         }
         .smartcharts-mobile & {
@@ -275,7 +280,7 @@
         border-color: var(--semantic-color-slate-solid-border-inverse-mid);
         border-width: 1.5px;
 
-        > p {
+        >p {
             color: var(--semantic-color-slate-solid-textIcon-normal-highest);
         }
 
@@ -286,7 +291,7 @@
         &:active {
             background-color: var(--semantic-color-monochrome-surface-normal-low);
 
-            > p {
+            >p {
                 color: var(--semantic-color-slate-solid-textIcon-normal-highest);
             }
         }
@@ -442,7 +447,7 @@
 
         /* Leading tool glyph only (direct child) - the trailing trash icon is a quill
            icon inside the delete button and is sized separately below. */
-        > svg {
+        >svg {
             block-size: 24px;
             flex-shrink: 0;
             inline-size: 24px;
@@ -467,7 +472,7 @@
             padding: 0;
 
             /* Design places the trash glyph in a 24px box; fill comes from the inline prop. */
-            > svg {
+            >svg {
                 block-size: 24px;
                 inline-size: 24px;
             }
@@ -494,6 +499,7 @@
         min-inline-size: 48px;
         padding-inline: 12px;
     }
+
     /* Empty state: 64px magnifier illustration over a bold title and a subtle caption,
        centred in the space the list would occupy. */
     &__empty {
@@ -525,6 +531,88 @@
             font-weight: 700;
             line-height: 1.5;
             margin: 0;
+        }
+    }
+}
+
+/* Download ------------------------------------------------------------------ */
+
+.sc-download-dialog {
+    &__content {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        padding: 32px 32px 24px;
+
+        /* On mobile quill's own `.action-sheet--content` already applies the design's
+           16px inset, so this layer contributes spacing only. */
+        .smartcharts-mobile & {
+            padding: 0;
+        }
+    }
+    &__title {
+        color: var(--component-textIcon-normal-prominent);
+        font-family: var(--core-fontFamily-inter, inherit);
+        font-size: 24px;
+        font-weight: 800;
+        line-height: 32px;
+        margin: 0;
+    }
+    &__description {
+        color: var(--component-textIcon-normal-subtle);
+        font-size: 14px;
+        line-height: 20px;
+        margin: 0;
+    }
+    &__tiles {
+        display: flex;
+        gap: 8px;
+        inline-size: 100%;
+    }
+
+    /* Deliberately the chart type tile's shape - icon over label, 16px radius - since both
+       present a small set of equally weighted options. These are actions rather than a
+       selection, so there is a hover state but no selected state. */
+    &__tile {
+        align-items: center;
+        background: transparent;
+        border-radius: 16px;
+        cursor: pointer;
+        display: flex;
+        flex: 1 0 0;
+        flex-direction: column;
+        /* Icon to label. Tighter than the 8px between the tiles themselves, so the pair
+           reads as one unit rather than two stacked items. */
+        gap: 4px;
+        min-inline-size: 0;
+        /* Centres the group if the row ever stretches a tile past its content height. */
+        justify-content: center;
+        padding: 16px 8px;
+
+        /* Sized on the `.ic-icon` wrapper rather than the svg it contains: the wrapper is
+           what the flex column measures, so sizing only the svg leaves it overflowing a
+           24px box and butting straight into the label, swallowing the gap above. */
+        .ic-icon {
+            block-size: 32px;
+            inline-size: 32px;
+
+            svg {
+                block-size: 100%;
+                inline-size: 100%;
+            }
+        }
+        &:hover {
+            background: var(--semantic-color-monochrome-surface-normal-lowest);
+        }
+        &:active {
+            background: var(--semantic-color-monochrome-surface-normal-low);
+        }
+        &__label {
+            color: var(--component-textIcon-normal-default);
+            font-size: 14px;
+            inline-size: 100%;
+            line-height: 20px;
+            text-align: center;
         }
     }
 }
@@ -601,7 +689,7 @@
             position: relative;
             text-align: start;
 
-            > span {
+            >span {
                 flex: 1 0 0;
                 min-inline-size: 0;
                 overflow: hidden;
@@ -669,6 +757,7 @@
             fill: var(--component-textIcon-normal-default);
         }
     }
+
     /* Quill's SearchField supplies the magnifier and the clear control; it is reshaped here
        into the design's flat 40px bar.
 
@@ -693,6 +782,7 @@
             min-block-size: 40px;
             padding-inline: 16px;
         }
+
         /* Quill repaints the wrapper on focus via `.quill-input__wrapper__variant--fill--neutral:focus-within`,
            which ties a two-class override on specificity and loads later - so a plain reset is
            beaten the moment the field is focused and the inner box returns. Going one class
@@ -719,6 +809,7 @@
                 color: var(--component-textIcon-normal-subtle);
             }
         }
+
         /* The clear control is a bare button in quill's markup; the icons around it reuse the
            same class on plain spans, so only the button is restyled. */
         button.icon_wrapper {
@@ -792,8 +883,8 @@
         padding: 16px;
         text-align: start;
 
-        > svg,
-        > .ic-icon {
+        >svg,
+        >.ic-icon {
             block-size: 20px;
             flex-shrink: 0;
             inline-size: 20px;
@@ -821,6 +912,7 @@
                 fill: var(--component-textIcon-normal-default);
             }
         }
+
         /* Quill icons default to a dark fill, which vanished against the dark theme's pane.
            The indicator icon beside it is a themed sprite, so only the chevron is claimed. */
         &__chevron {
@@ -838,12 +930,14 @@
             }
         }
     }
+
     /* Quill's tooltip wraps the row in an element of its own; it must not disturb the list's
        column layout or steal the row's full width. */
     &__row-tip {
         display: block;
         inline-size: 100%;
     }
+
     /* Active rows are not themselves clickable - only their trailing controls are - and
        the design separates them with a hairline. */
     &__list--active &__row {
@@ -877,7 +971,7 @@
         &__item {
             padding-block: 16px;
 
-            + .sc-indicators-dialog__guide__item {
+            +.sc-indicators-dialog__guide__item {
                 border-block-start: 1px solid var(--semantic-color-monochrome-border-normal-mid);
             }
         }
@@ -971,6 +1065,7 @@
                 border-radius: 999px;
             }
         }
+
         /* Colour and select parameters sit two-up, as in the design. */
         &__grid {
             display: grid;
@@ -1173,15 +1268,14 @@
             font-weight: 700;
             line-height: 1.5;
         }
+
         /* A native range input, restyled: the filled portion is painted with a gradient
            driven by --sc-slider-progress, which the component sets per value. */
         &__input {
             appearance: none;
-            background: linear-gradient(
-                to right,
-                var(--semantic-color-slate-solid-border-inverse-mid) 0 var(--sc-slider-progress, 0%),
-                var(--semantic-color-monochrome-border-normal-mid) var(--sc-slider-progress, 0%) 100%
-            );
+            background: linear-gradient(to right,
+            var(--semantic-color-slate-solid-border-inverse-mid) 0 var(--sc-slider-progress, 0%),
+            var(--semantic-color-monochrome-border-normal-mid) var(--sc-slider-progress, 0%) 100%);
             block-size: 4px;
             border-radius: 8px;
             cursor: pointer;
