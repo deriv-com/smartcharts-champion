@@ -26,6 +26,7 @@
         --semantic-color-monochrome-surface-normal-midHigh: rgba(0, 0, 0, 0.24);
         --semantic-color-slate-solid-border-inverse-mid: #181c25;
     }
+
     &.smartcharts-dark {
         --semantic-color-slate-solid-surface-frame-low: #181c25;
         --semantic-color-slate-solid-surface-frame-mid: #11141b;
@@ -73,6 +74,7 @@
             line-height: 24px;
         }
     }
+
     &__divider {
         background: var(--semantic-color-monochrome-border-normal-low);
         block-size: 1px;
@@ -95,11 +97,18 @@
             background-color: var(--semantic-color-monochrome-surface-normal-low);
         }
     }
+
     &.sc-chart-type-dialog {
         inline-size: 560px;
     }
+
     &.sc-draw-tools-dialog {
         inline-size: 512px;
+    }
+
+    /* Narrower than its siblings: two tiles and a sentence, with no list to give room to. */
+    &.sc-download-dialog {
+        inline-size: 400px;
     }
 }
 
@@ -119,12 +128,14 @@
             padding: 0;
         }
     }
+
     &__section {
         display: flex;
         flex-direction: column;
         gap: 16px;
         inline-size: 100%;
     }
+
     &__types {
         display: flex;
         align-items: stretch;
@@ -188,6 +199,7 @@
             inset-block-end: 100%;
         }
     }
+
     &__tile {
         align-items: center;
         background: transparent;
@@ -205,6 +217,7 @@
             block-size: 24px;
             inline-size: 24px;
         }
+
         &__label {
             color: var(--component-textIcon-normal-default);
             font-size: 14px;
@@ -212,27 +225,32 @@
             text-align: center;
             inline-size: 100%;
         }
+
         &--active {
             background: var(--semantic-color-monochrome-surface-normal-lowest);
             border-color: var(--semantic-color-slate-solid-border-inverse-mid);
         }
+
         &--disabled {
             cursor: default;
 
             svg {
                 opacity: 0.32;
             }
+
             .sc-chart-type-dialog__tile__label {
                 color: var(--component-textIcon-normal-subtle);
             }
         }
     }
+
     &__intervals {
         display: flex;
         flex-direction: column;
         gap: 12px;
         inline-size: 100%;
     }
+
     &__interval-row {
         display: flex;
         align-items: center;
@@ -247,7 +265,8 @@
         flex: 1 0 0;
         min-inline-size: 0;
     }
-    &__interval > .quill-chip {
+
+    &__interval>.quill-chip {
         inline-size: 100%;
         /* Design uses a tighter inline padding than quill's md default so "10m"/"30m" fit. */
         padding-inline: 12px;
@@ -259,9 +278,10 @@
         }
 
         /* "1 tick" is the widest label and must stay on one line, as in the design. */
-        > p {
+        >p {
             white-space: nowrap;
         }
+
         .smartcharts-mobile & {
             padding-inline: 8px;
         }
@@ -270,12 +290,12 @@
     /* Selected chip: filled + 1.5px inverse border, per the Figma spec. Quill's own selected
        styling uses a mid-grey fill and an inverted label, so the box and text both need
        overriding - but the weight stays at the unselected value, as the design has it. */
-    &__interval > .quill-chip[data-state='selected'] {
+    &__interval>.quill-chip[data-state='selected'] {
         background-color: var(--semantic-color-monochrome-surface-normal-lowest);
         border-color: var(--semantic-color-slate-solid-border-inverse-mid);
         border-width: 1.5px;
 
-        > p {
+        >p {
             color: var(--semantic-color-slate-solid-textIcon-normal-highest);
         }
 
@@ -286,7 +306,7 @@
         &:active {
             background-color: var(--semantic-color-monochrome-surface-normal-low);
 
-            > p {
+            >p {
                 color: var(--semantic-color-slate-solid-textIcon-normal-highest);
             }
         }
@@ -317,6 +337,7 @@
         gap: 16px;
         inline-size: 100%;
     }
+
     &__title {
         color: var(--component-textIcon-normal-prominent);
         font-family: var(--core-fontFamily-inter, inherit);
@@ -325,6 +346,7 @@
         line-height: 32px;
         margin: 0;
     }
+
     &__tabs {
         inline-size: 100%;
 
@@ -385,18 +407,21 @@
         &::-webkit-scrollbar {
             inline-size: 6px;
         }
+
         &::-webkit-scrollbar-track,
         &::-webkit-scrollbar-track:hover,
         &::-webkit-scrollbar-track:active,
         &::-webkit-scrollbar-corner {
             background: transparent;
         }
+
         &::-webkit-scrollbar-thumb,
         &::-webkit-scrollbar-thumb:hover,
         &::-webkit-scrollbar-thumb:active {
             background-color: var(--semantic-color-monochrome-surface-normal-midHigh);
             border-radius: 999px;
         }
+
         &::-webkit-scrollbar-button {
             display: none;
         }
@@ -406,6 +431,7 @@
            swipe-to-dismiss is only picked up on the handlebar, not over the list. */
         -webkit-overflow-scrolling: touch;
     }
+
     &__list {
         display: flex;
         flex-direction: column;
@@ -417,11 +443,13 @@
             gap: 8px;
         }
     }
+
     &__separator {
         background: var(--semantic-color-monochrome-border-normal-mid);
         block-size: 1px;
         inline-size: 100%;
     }
+
     &__item {
         align-items: center;
         background: transparent;
@@ -442,11 +470,12 @@
 
         /* Leading tool glyph only (direct child) - the trailing trash icon is a quill
            icon inside the delete button and is sized separately below. */
-        > svg {
+        >svg {
             block-size: 24px;
             flex-shrink: 0;
             inline-size: 24px;
         }
+
         &__label {
             color: var(--semantic-color-slate-solid-textIcon-normal-highest);
             flex: 1 0 0;
@@ -457,6 +486,7 @@
             text-overflow: ellipsis;
             white-space: nowrap;
         }
+
         &__delete {
             align-items: center;
             background: transparent;
@@ -467,12 +497,13 @@
             padding: 0;
 
             /* Design places the trash glyph in a 24px box; fill comes from the inline prop. */
-            > svg {
+            >svg {
                 block-size: 24px;
                 inline-size: 24px;
             }
         }
     }
+
     &__actions {
         display: flex;
         /* Pinned above the scroll area - never compressed by a long list. */
@@ -480,6 +511,7 @@
         justify-content: flex-end;
         inline-size: 100%;
     }
+
     &__clear-all {
         background: transparent;
         border: 1px solid var(--semantic-color-slate-solid-border-inverse-mid);
@@ -494,6 +526,7 @@
         min-inline-size: 48px;
         padding-inline: 12px;
     }
+
     /* Empty state: 64px magnifier illustration over a bold title and a subtle caption,
        centred in the space the list would occupy. */
     &__empty {
@@ -512,6 +545,7 @@
             display: block;
             inline-size: 64px;
         }
+
         &__text {
             display: flex;
             flex-direction: column;
@@ -519,12 +553,101 @@
             inline-size: 100%;
             margin-block-start: 8px;
         }
+
         &__title {
             color: var(--semantic-color-slate-solid-textIcon-normal-highest);
             font-size: 14px;
             font-weight: 700;
             line-height: 1.5;
             margin: 0;
+        }
+    }
+}
+
+/* Download ------------------------------------------------------------------ */
+
+.sc-download-dialog {
+    &__content {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        padding: 32px 32px 24px;
+
+        /* On mobile quill's own `.action-sheet--content` already applies the design's
+           16px inset, so this layer contributes spacing only. */
+        .smartcharts-mobile & {
+            padding: 0;
+        }
+    }
+
+    &__title {
+        color: var(--component-textIcon-normal-prominent);
+        font-family: var(--core-fontFamily-inter, inherit);
+        font-size: 24px;
+        font-weight: 800;
+        line-height: 32px;
+        margin: 0;
+    }
+
+    &__description {
+        color: var(--component-textIcon-normal-subtle);
+        font-size: 14px;
+        line-height: 20px;
+        margin: 0;
+    }
+
+    &__tiles {
+        display: flex;
+        gap: 8px;
+        inline-size: 100%;
+    }
+
+    /* Deliberately the chart type tile's shape - icon over label, 16px radius - since both
+       present a small set of equally weighted options. These are actions rather than a
+       selection, so there is a hover state but no selected state. */
+    &__tile {
+        align-items: center;
+        background: transparent;
+        border-radius: 16px;
+        cursor: pointer;
+        display: flex;
+        flex: 1 0 0;
+        flex-direction: column;
+        /* Icon to label. Tighter than the 8px between the tiles themselves, so the pair
+           reads as one unit rather than two stacked items. */
+        gap: 4px;
+        min-inline-size: 0;
+        /* Centres the group if the row ever stretches a tile past its content height. */
+        justify-content: center;
+        padding: 16px 8px;
+
+        /* Sized on the `.ic-icon` wrapper rather than the svg it contains: the wrapper is
+           what the flex column measures, so sizing only the svg leaves it overflowing a
+           24px box and butting straight into the label, swallowing the gap above. */
+        .ic-icon {
+            block-size: 32px;
+            inline-size: 32px;
+
+            svg {
+                block-size: 100%;
+                inline-size: 100%;
+            }
+        }
+
+        &:hover {
+            background: var(--semantic-color-monochrome-surface-normal-lowest);
+        }
+
+        &:active {
+            background: var(--semantic-color-monochrome-surface-normal-low);
+        }
+
+        &__label {
+            color: var(--component-textIcon-normal-default);
+            font-size: 14px;
+            inline-size: 100%;
+            line-height: 20px;
+            text-align: center;
         }
     }
 }
@@ -570,22 +693,26 @@
             margin: 0;
             padding-inline: 16px;
         }
+
         &__group {
             display: flex;
             flex-direction: column;
             gap: 16px;
             inline-size: 100%;
         }
+
         &__list {
             display: flex;
             flex-direction: column;
             inline-size: 100%;
         }
+
         &__divider {
             background: var(--semantic-color-monochrome-border-normal-mid);
             block-size: 1px;
             margin-inline: 16px;
         }
+
         &__item {
             align-items: center;
             background: transparent;
@@ -601,7 +728,7 @@
             position: relative;
             text-align: start;
 
-            > span {
+            >span {
                 flex: 1 0 0;
                 min-inline-size: 0;
                 overflow: hidden;
@@ -619,6 +746,7 @@
                 inset-inline-end: 0;
                 position: absolute;
             }
+
             &--selected {
                 color: var(--semantic-color-slate-solid-textIcon-normal-highest);
                 font-weight: 700;
@@ -637,6 +765,7 @@
         min-inline-size: 0;
         padding-inline: 8px;
     }
+
     &__header {
         align-items: center;
         block-size: 40px;
@@ -649,6 +778,7 @@
         justify-content: space-between;
         padding-inline: 16px;
     }
+
     &__icon-btn {
         align-items: center;
         background: var(--semantic-color-monochrome-surface-normal-lowest);
@@ -665,10 +795,12 @@
         &:hover {
             background: var(--semantic-color-monochrome-surface-normal-low);
         }
+
         svg {
             fill: var(--component-textIcon-normal-default);
         }
     }
+
     /* Quill's SearchField supplies the magnifier and the clear control; it is reshaped here
        into the design's flat 40px bar.
 
@@ -693,11 +825,13 @@
             min-block-size: 40px;
             padding-inline: 16px;
         }
+
         /* Quill repaints the wrapper on focus via `.quill-input__wrapper__variant--fill--neutral:focus-within`,
            which ties a two-class override on specificity and loads later - so a plain reset is
            beaten the moment the field is focused and the inner box returns. Going one class
            deeper outranks it in every state. */
         .quill-input__container .quill-input__wrapper {
+
             &,
             &:focus,
             &:focus-within {
@@ -709,6 +843,7 @@
                 padding: 0;
             }
         }
+
         .quill-input {
             color: var(--semantic-color-slate-solid-textIcon-normal-highest);
             font-family: inherit;
@@ -719,6 +854,7 @@
                 color: var(--component-textIcon-normal-subtle);
             }
         }
+
         /* The clear control is a bare button in quill's markup; the icons around it reuse the
            same class on plain spans, so only the button is restyled. */
         button.icon_wrapper {
@@ -729,10 +865,12 @@
             display: flex;
             padding: 0;
         }
+
         svg {
             flex-shrink: 0;
         }
     }
+
     &__title {
         color: var(--semantic-color-slate-solid-textIcon-normal-highest);
         font-family: var(--core-fontFamily-inter, inherit);
@@ -767,10 +905,12 @@
         &::-webkit-scrollbar {
             inline-size: 6px;
         }
+
         &::-webkit-scrollbar-track,
         &::-webkit-scrollbar-corner {
             background: transparent;
         }
+
         &::-webkit-scrollbar-thumb,
         &::-webkit-scrollbar-thumb:hover,
         &::-webkit-scrollbar-thumb:active {
@@ -778,6 +918,7 @@
             border-radius: 999px;
         }
     }
+
     &__row {
         align-items: center;
         background: transparent;
@@ -792,12 +933,13 @@
         padding: 16px;
         text-align: start;
 
-        > svg,
-        > .ic-icon {
+        >svg,
+        >.ic-icon {
             block-size: 20px;
             flex-shrink: 0;
             inline-size: 20px;
         }
+
         &__label {
             flex: 1 0 0;
             font-size: 16px;
@@ -808,6 +950,7 @@
             text-overflow: ellipsis;
             white-space: nowrap;
         }
+
         &__action {
             align-items: center;
             background: transparent;
@@ -821,14 +964,17 @@
                 fill: var(--component-textIcon-normal-default);
             }
         }
+
         /* Quill icons default to a dark fill, which vanished against the dark theme's pane.
            The indicator icon beside it is a themed sprite, so only the chevron is claimed. */
         &__chevron {
             fill: var(--component-textIcon-normal-default);
         }
+
         &:hover {
             background: var(--semantic-color-monochrome-surface-normal-lowest);
         }
+
         &--disabled {
             cursor: default;
             opacity: 0.32;
@@ -838,12 +984,14 @@
             }
         }
     }
+
     /* Quill's tooltip wraps the row in an element of its own; it must not disturb the list's
        column layout or steal the row's full width. */
     &__row-tip {
         display: block;
         inline-size: 100%;
     }
+
     /* Active rows are not themselves clickable - only their trailing controls are - and
        the design separates them with a hairline. */
     &__list--active &__row {
@@ -870,17 +1018,20 @@
         &::-webkit-scrollbar {
             inline-size: 6px;
         }
+
         &::-webkit-scrollbar-thumb {
             background-color: var(--semantic-color-monochrome-surface-normal-midHigh);
             border-radius: 999px;
         }
+
         &__item {
             padding-block: 16px;
 
-            + .sc-indicators-dialog__guide__item {
+            +.sc-indicators-dialog__guide__item {
                 border-block-start: 1px solid var(--semantic-color-monochrome-border-normal-mid);
             }
         }
+
         &__title {
             align-items: center;
             color: var(--semantic-color-slate-solid-textIcon-normal-highest);
@@ -897,6 +1048,7 @@
                 inline-size: 20px;
             }
         }
+
         &__text {
             color: var(--component-textIcon-normal-default);
             font-size: 14px;
@@ -923,11 +1075,13 @@
             inline-size: 64px;
             margin-block-end: 8px;
         }
+
         &__text {
             display: flex;
             flex-direction: column;
             gap: 4px;
         }
+
         &__title {
             color: var(--semantic-color-slate-solid-textIcon-normal-highest);
             font-size: 14px;
@@ -935,6 +1089,7 @@
             line-height: 1.5;
             margin: 0;
         }
+
         &__subtitle {
             color: var(--component-textIcon-normal-subtle);
             font-size: 14px;
@@ -966,22 +1121,26 @@
             &::-webkit-scrollbar {
                 inline-size: 6px;
             }
+
             &::-webkit-scrollbar-thumb {
                 background-color: var(--semantic-color-monochrome-surface-normal-midHigh);
                 border-radius: 999px;
             }
         }
+
         /* Colour and select parameters sit two-up, as in the design. */
         &__grid {
             display: grid;
             gap: 16px;
             grid-template-columns: 1fr 1fr;
         }
+
         &__stack {
             display: flex;
             flex-direction: column;
             gap: 16px;
         }
+
         &__actions {
             display: flex;
             flex-shrink: 0;
@@ -991,6 +1150,7 @@
             padding-inline: 16px;
         }
     }
+
     &__btn {
         align-items: center;
         block-size: 40px;
@@ -1010,11 +1170,13 @@
             border: 1.5px solid var(--semantic-color-slate-solid-border-inverse-mid);
             color: var(--semantic-color-slate-solid-textIcon-normal-highest);
         }
+
         &--primary {
             background: #ff444f;
             border: 0;
             color: #ffffff;
         }
+
         &:disabled {
             cursor: default;
             opacity: 0.32;
@@ -1046,10 +1208,12 @@
                 fill: var(--component-textIcon-normal-default);
                 flex-shrink: 0;
             }
+
             &--open {
                 border-color: var(--semantic-color-slate-solid-border-inverse-mid);
             }
         }
+
         &__label {
             flex: 1 0 0;
             font-size: 16px;
@@ -1067,6 +1231,7 @@
             }
         }
     }
+
     &__swatch {
         block-size: 16px;
         border-radius: 999px;
@@ -1088,6 +1253,7 @@
         box-shadow: 0 8px 24px rgba(0, 0, 0, 0.16);
         z-index: 10000;
     }
+
     &__swatches {
         display: grid;
         gap: 8px;
@@ -1116,6 +1282,7 @@
             }
         }
     }
+
     &__options {
         display: flex;
         flex-direction: column;
@@ -1140,6 +1307,7 @@
             &:hover {
                 background: var(--semantic-color-monochrome-surface-normal-lowest);
             }
+
             &--selected {
                 font-weight: 700;
             }
@@ -1158,6 +1326,7 @@
             display: flex;
             gap: 12px;
         }
+
         &__label {
             color: var(--semantic-color-slate-solid-textIcon-normal-highest);
             flex: 1 0 0;
@@ -1167,21 +1336,21 @@
             overflow: hidden;
             text-overflow: ellipsis;
         }
+
         &__value {
             color: var(--semantic-color-slate-solid-textIcon-normal-highest);
             font-size: 16px;
             font-weight: 700;
             line-height: 1.5;
         }
+
         /* A native range input, restyled: the filled portion is painted with a gradient
            driven by --sc-slider-progress, which the component sets per value. */
         &__input {
             appearance: none;
-            background: linear-gradient(
-                to right,
-                var(--semantic-color-slate-solid-border-inverse-mid) 0 var(--sc-slider-progress, 0%),
-                var(--semantic-color-monochrome-border-normal-mid) var(--sc-slider-progress, 0%) 100%
-            );
+            background: linear-gradient(to right,
+                    var(--semantic-color-slate-solid-border-inverse-mid) 0 var(--sc-slider-progress, 0%),
+                    var(--semantic-color-monochrome-border-normal-mid) var(--sc-slider-progress, 0%) 100%);
             block-size: 4px;
             border-radius: 8px;
             cursor: pointer;
@@ -1197,6 +1366,7 @@
                 cursor: pointer;
                 inline-size: 24px;
             }
+
             &::-moz-range-thumb {
                 background: var(--semantic-color-slate-solid-border-inverse-mid);
                 block-size: 24px;
@@ -1221,6 +1391,7 @@
             font-size: 16px;
             line-height: 1.5;
         }
+
         &__control {
             background: var(--semantic-color-monochrome-surface-normal-low);
             block-size: 24px;
@@ -1244,6 +1415,7 @@
                 position: absolute;
                 transition: inset-inline-start 0.15s ease;
             }
+
             &--on {
                 background: #00a758;
 
@@ -1253,6 +1425,7 @@
             }
         }
     }
+
     &__paired {
         align-items: center;
         display: flex;
@@ -1264,6 +1437,7 @@
             font-size: 16px;
             line-height: 1.5;
         }
+
         &__value {
             background: var(--semantic-color-slate-solid-surface-frame-low);
             block-size: 40px;
@@ -1275,10 +1449,12 @@
             inline-size: 80px;
             padding-inline: 12px;
         }
+
         .sc-indicators-dialog__field {
             flex-shrink: 0;
             inline-size: 72px;
         }
+
         .sc-indicators-dialog__field__control {
             block-size: 40px;
             justify-content: center;
@@ -1299,6 +1475,7 @@
             fill: var(--component-textIcon-normal-default);
             flex-shrink: 0;
         }
+
         &__body {
             display: flex;
             flex: 1 0 0;
@@ -1306,6 +1483,7 @@
             gap: 8px;
             min-inline-size: 0;
         }
+
         &__title {
             color: var(--semantic-color-slate-solid-textIcon-normal-highest);
             font-size: 16px;
@@ -1313,6 +1491,7 @@
             line-height: 1.5;
             margin: 0;
         }
+
         &__text {
             color: var(--component-textIcon-normal-default);
             font-size: 14px;
@@ -1338,6 +1517,7 @@
         gap: 8px;
         padding: 24px;
     }
+
     &__title {
         color: var(--semantic-color-slate-solid-textIcon-normal-highest);
         font-family: var(--core-fontFamily-inter, inherit);
@@ -1346,17 +1526,20 @@
         line-height: 1.5;
         margin: 0;
     }
+
     &__text {
         color: var(--component-textIcon-normal-default);
         font-size: 14px;
         line-height: 1.5;
         margin: 0;
     }
+
     &__actions {
         display: flex;
         gap: 8px;
         margin-block-start: 16px;
     }
+
     &__btn {
         align-items: center;
         block-size: 40px;
@@ -1375,6 +1558,7 @@
             border: 1.5px solid var(--semantic-color-slate-solid-border-inverse-mid);
             color: var(--semantic-color-slate-solid-textIcon-normal-highest);
         }
+
         &--primary {
             background: #ff444f;
             border: 0;
@@ -1394,6 +1578,6 @@
  * Keyed off a marker inside the content so every other quill tooltip keeps its own arrow, and
  * written as `left` because that is the physical property quill sets inline.
  */
-.react-tiny-popover-container:has(.sc-indicators-dialog__tip) > div > div:first-child {
+.react-tiny-popover-container:has(.sc-indicators-dialog__tip)>div>div:first-child {
     left: 52px !important;
 }

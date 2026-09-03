@@ -1,53 +1,35 @@
+/* eslint-disable react/react-in-jsx-scope -- tsconfig uses jsx:"react-jsx";
+   React is injected by webpack's ProvidePlugin, so importing it here would be unused. */
 import classNames from 'classnames';
 import { observer } from 'mobx-react-lite';
 import { useStores } from 'src/store';
-import { ChartDownloadIcon, PngIcon, CsvIcon } from './Icons';
-import { InlineLoader } from './Loader';
-import '../../sass/components/_download.scss';
-import Menu from './Menu';
+import DialogTrigger from './DialogTrigger';
+import DownloadDialog from './DownloadDialog';
+import { ChartDownloadIcon } from './Icons';
 
 type TShareProps = {
+    /**
+     * Retained for API compatibility. The redesigned dialogs manage their own themed portal,
+     * so this is no longer used for placement.
+     */
     portalNodeId?: string;
 };
 
-const Share = ({ portalNodeId }: TShareProps) => {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const Share = (_props: TShareProps) => {
     const { share } = useStores();
-    const { menuStore, downloadCSV, downloadPNG, isLoadingPNG } = share;
-    const { open: menuOpen } = menuStore.dialogStore;
+    const { menuStore } = share;
+    const menuOpen = menuStore.open;
 
     return (
-        <Menu
-            store={menuStore}
-            className='sc-download-menu'
-            title={t.translate('Download')}
-            tooltip={t.translate('Download')}
-            modalMode
-            isFullscreen
-            portalNodeId={portalNodeId}
-        >
-            <Menu.Title>
+        <>
+            <DialogTrigger store={menuStore} className='sc-download-menu' tooltip={t.translate('Download')}>
                 <div className={classNames('sc-download__menu', { 'sc-download__menu--active': menuOpen })}>
                     <ChartDownloadIcon />
                 </div>
-            </Menu.Title>
-            <Menu.Body>
-                <div className='sc-download'>
-                    <p className='sc-download__description'>
-                        {t.translate(
-                            'Download your current chart view as a PNG or export the historical data for analysis as a CSV.'
-                        )}
-                    </p>
-                    <InlineLoader className='sc-download__item' onClick={downloadPNG} enabled={isLoadingPNG}>
-                        <PngIcon />
-                        <span className='sc-download__item__label'> {t.translate('PNG')} </span>
-                    </InlineLoader>
-                    <div className='sc-download__item' onClick={downloadCSV}>
-                        <CsvIcon />
-                        <span className='sc-download__item__label'> {t.translate('CSV')}</span>
-                    </div>
-                </div>
-            </Menu.Body>
-        </Menu>
+            </DialogTrigger>
+            <DownloadDialog />
+        </>
     );
 };
 
