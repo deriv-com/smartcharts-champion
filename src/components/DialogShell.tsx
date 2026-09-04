@@ -83,7 +83,7 @@ type TDialogShellProps = {
  * quill implementation detail. `display: contents` keeps the wrapper out of the layout while
  * still carrying the event - propagation follows the DOM tree, not the box tree.
  */
-const markHandled = (e: React.MouseEvent) => {
+export const markHandled = (e: React.MouseEvent) => {
     (e.nativeEvent as unknown as { isHandledByDialog?: boolean }).isHandledByDialog = true;
 };
 

@@ -3,6 +3,7 @@ import { useEffect, useRef, useCallback } from 'react';
 import classNames from 'classnames';
 import { observer } from 'mobx-react-lite';
 import { useStores } from '../store';
+import { markHandled } from './DialogShell';
 import { getDrawTools } from '../Constant';
 import { CloseIcon } from './Icons';
 
@@ -85,6 +86,11 @@ const DeletionSnackbar = observer(({ className }: TDeletionSnackbarProps) => {
             className={classNames('sc-deletion-snackbar', className)}
             role='alert'
             aria-live='polite'
+            // The snackbar is rendered by `Chart`, outside any dialog, so `DialogStore`'s
+            // document listener treats taps on it as clicks outside the open dialog and
+            // closes it. Dismissing the snackbar should leave the drawing tools sheet that
+            // spawned it exactly where it was.
+            onClickCapture={markHandled}
         >
             <div className='sc-deletion-snackbar__content'>
                 <span className='sc-deletion-snackbar__message'>{getDeletionMessage()}</span>
