@@ -82,13 +82,16 @@
         }
     }
 
-    // Mobile responsive
+    // Mobile responsive.
+    //
+    // Only the width cap changes here. Earlier this block also set `left: 0; right: 0;
+    // transform: none`, but the base rule sizes the snackbar to its content
+    // (`width: max-content`), so a fixed box with both offsets *and* a width is
+    // over-constrained: `right` is dropped and it pins to the left edge. Keeping the
+    // `left: 50%` / `translateX(-50%)` centring from above keeps it centred on every
+    // width, and lets both sizes share one entry animation.
     @media (max-width: 768px) {
         max-width: calc(100vw - 32px);
-        margin: 0 16px;
-        left: 0;
-        right: 0;
-        transform: none;
 
         &__message {
             font-size: 14px;
@@ -104,17 +107,5 @@
     to {
         opacity: 1;
         transform: translateX(-50%) translateY(0);
-    }
-}
-
-// Mobile animation
-@media (max-width: 768px) {
-    @keyframes slideUpSnackbar {
-        from {
-            opacity: 0;
-        }
-        to {
-            opacity: 1;
-        }
     }
 }
